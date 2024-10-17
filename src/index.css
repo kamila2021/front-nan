@@ -1,0 +1,81 @@
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap');
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: 'Poppins', 'sans-serif';
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  background: url('./Components/Assets/fondo-login.jpg') no-repeat center center;
+  background-size: cover;
+  min-height: 100vh;
+  margin: 0;
+}
+.inicio-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-top: 20px;
+}
+
+/* Asegúrate de que el banner esté centrado y tenga el tamaño correcto */
+.banner {
+  width: 100%;
+  height: auto;
+}
+
+/* Coloca los botones en la parte inferior del banner */
+.inicio-buttons {
+  display: flex;
+  justify-content: center;
+  margin-top: 20px;
+}
+
+.inicio-buttons button {
+  margin: 0 10px;
+  padding: 10px 20px;
+  font-size: 16px;
+}
+.navbar {
+  display: flex;
+    align-items: center;
+    justify-content: flex-end; /* Alinear elementos a la derecha */
+    background: #fff;
+    padding: 20px 80px; /* Puedes ajustar el padding según tus necesidades */
+    box-shadow: 0 5px 15px rgba(255, 255, 255, 0.9);
+}
+
+
+
+
+
+.navbar ul {
+  list-style: none;
+  display: flex;
+  gap: 20px;
+}
+
+.navbar ul li a {
+  text-decoration: none;
+  color: #333;
+  font-weight: 700;
+}
+
+.center-content {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: calc(100vh - 80px); /* Ajusta para dar espacio al navbar */
+  padding-top: 80px;
+  background-color: transparent; /* Evita que aparezca gris debajo del contenido */
+}
+
+
+/* Otros estilos del código que ya tienes */
+code {
+  font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New', monospace;
+}

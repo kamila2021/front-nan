@@ -1,0 +1,93 @@
+nav{
+    display: flex;
+    align-items: center;
+    justify-content: flex-end; /* Alinear elementos a la derecha */
+    background: rgba(255, 255, 255, 0.9); /* Fondo blanco semi-transparente */
+    padding: 20px 80px; /* Ajusta el padding según tus necesidades */
+    box-shadow: 0 5px 15px rgba(255, 255, 255, 0.9);
+    position: fixed; /* Mantiene el navbar fijo en la parte superior */
+    top: 0; /* Asegúrate de que esté en la parte superior */
+    left: 0;
+    right: 0;
+    z-index: 100; /* Asegúrate de que esté por encima de otros elementos */
+}
+
+#navbar{
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+
+#navbar li {
+    list-style: none;
+    padding: 0 20px; /* Espaciado entre los enlaces */
+    position: relative;
+}
+
+#navbar li a {
+    text-decoration: none;
+    font-size: 1.1rem; /* Puedes ajustar el tamaño */
+    font-weight: 600;
+    color: #000;
+    transition: 0.3s ease-in-out;
+}
+
+#navbar li a:hover,
+#navbar li a.active {
+    color: #aafbe3;
+}
+
+#navbar li a:hover::after,
+#navbar li a.active::after {
+    content: "";
+    width: 30%;
+    height: 2px;
+    background-color: #aafbe3;
+    position: absolute;
+    bottom: -4px;
+    left: 20px; /* Ajusta según el diseño */
+}
+
+#mobile {
+    display: none; /* Ocultar por defecto */
+}
+
+#mobile i {
+    color: #000;
+    align-items: center;
+}
+
+@media screen and (max-width: 769px) {
+    #navbar {
+        display: flex; 
+        flex-direction: column; 
+        align-items: flex-start; 
+        justify-content: flex-start; 
+        position: fixed; 
+        top: 90px; 
+        right: -300px;
+        width: 300px; 
+        height: 100vh; 
+        background: #fff; 
+        box-shadow: 0 40px 60px rgba(0, 0, 0, 0.1);
+        padding: 40px  0 0 10px; 
+        z-index: 99;
+       
+    }
+    #navbar.active{
+        right: 0px;
+    }
+    #navbar li{
+        margin-bottom:25px; 
+    }
+
+    #mobile {
+        display: block; 
+    }
+    
+    #mobile i{
+        font-size: 24px;
+        cursor: pointer;
+    }
+}

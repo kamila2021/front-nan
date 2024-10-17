@@ -1,0 +1,91 @@
+/* General styling for the wrapper, consistent with LoginForm */
+.wrapper {
+    width: 420px;
+    background: transparent;
+    border: 2px solid rgba(255, 255, 255, 0.2);
+    backdrop-filter: blur(30px);
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
+    color: #fff;
+    border-radius: 10px;
+    padding: 30px 40px;
+}
+
+/* Title styling */
+.wrapper h1 {
+    font-size: 36px;
+    text-align: center;
+}
+
+/* Styling for input fields */
+.wrapper .input-box {
+    position: relative;
+    width: 100%;
+    height: 50px;
+    margin: 30px 0;
+}
+
+.input-box input {
+    width: 100%;
+    height: 100%;
+    background: transparent;
+    border: none;
+    outline: none;
+    border: 2px solid rgba(255, 255, 255, 0.2);
+    border-radius: 40px;
+    font-size: 16px;
+    color: #fff;
+    padding: 20px 45px 20px 20px;
+}
+
+.input-box input::placeholder {
+    color: #fff;
+}
+
+/* Styling for buttons */
+.wrapper button {
+    width: 100%;
+    height: 45px;
+    background: #fff;
+    border: none;
+    outline: none;
+    border-radius: 40px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    cursor: pointer;
+    font-size: 16px;
+    color: #333;
+    font-weight: 700;
+    margin-top: 20px; /* Adds space between buttons if needed */
+}
+
+/* Styling for success and error messages */
+.success-message {
+    color: #28a745; /* Green for success */
+    font-size: 14px;
+    text-align: center;
+    margin-top: 10px;
+}
+
+.error-message {
+    color: #dc3545; /* Red for error */
+    font-size: 14px;
+    text-align: center;
+    margin-top: 10px;
+}
+
+/* Additional back button for forgot password */
+.wrapper .back-button {
+    margin-top: 15px;
+    background: transparent;
+    color: #fff;
+    border: 2px solid #fff;
+    cursor: pointer;
+    padding: 10px;
+    border-radius: 40px;
+    text-align: center;
+    transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+.wrapper .back-button:hover {
+    background-color: #fff;
+    color: #333;
+}
