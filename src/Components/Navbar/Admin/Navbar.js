@@ -34,6 +34,11 @@ class Navbar extends Component {
               </a>
             </li>
             <li>
+              <a  className={currentScreen === 'asignaturas' ? 'active' : ''} href="#" onClick={() => this.props.onNavigate('asignaturas')}>
+                Asignaturas
+              </a>
+            </li>
+            <li>
               <a  className={currentScreen === 'profesores' ? 'active' : ''} href="#" onClick={() => this.props.onNavigate('profesores')}>
                 Profesores
                 </a>

@@ -1,5 +1,7 @@
+/* Asignaturas.css */
+
 /* Contenedor principal */
-.alumnos-container {
+.asignaturas-container {
     padding: 20px;
     max-width: 1200px;
     margin: 0 auto;
@@ -11,7 +13,7 @@
     margin-bottom: 20px;
 }
 
-/* Barra superior para la búsqueda y el botón de nuevo alumno */
+/* Barra superior para la búsqueda y el botón de nueva asignatura */
 .top-bar {
     display: flex;
     justify-content: space-between;
@@ -31,7 +33,7 @@
     border-radius: 4px;
 }
 
-.new-alumno {
+.new-asignatura {
     background-color: #4CAF50;
     color: white;
     border: none;
@@ -39,10 +41,13 @@
     font-size: 1.2rem;
     border-radius: 4px;
     cursor: pointer;
-    transition: background-color 0.3s; /* Transición suave al cambiar el color de fondo */
 }
 
-.new-alumno:hover {
+.new-asignatura i {
+    margin-right: 5px;
+}
+
+.new-asignatura:hover {
     background-color: #45a049;
 }
 
@@ -66,7 +71,6 @@ table th {
     font-weight: bold;
 }
 
-/* Botones en la tabla */
 table td button {
     background-color: #2196F3;
     color: white;
@@ -75,8 +79,11 @@ table td button {
     font-size: 0.9rem;
     border-radius: 4px;
     cursor: pointer;
-    margin-right: 10px; /* Margen derecho para separar los botones */
-    transition: background-color 0.3s; /* Transición suave al cambiar el color de fondo */
+    margin-right: 10px; /* Añadir margen derecho para separar los botones */
+}
+
+table td button:last-child {
+    margin-right: 0; /* Asegurarse que el último botón no tenga margen adicional */
 }
 
 table td button:hover {
@@ -114,6 +121,7 @@ table td .fa-trash:hover {
     max-width: 600px;
     border-radius: 8px;
     box-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+    position: relative;
 }
 
 .modal h3 {
@@ -123,14 +131,13 @@ table td .fa-trash:hover {
 }
 
 /* Formulario en el modal */
-.modal-content label {
+.form-modal label {
     display: block;
     margin-bottom: 8px;
     font-weight: bold;
 }
 
-.modal-content input,
-.modal-content select {
+.form-modal input {
     width: 100%;
     padding: 10px;
     margin-bottom: 15px;
@@ -151,7 +158,6 @@ table td .fa-trash:hover {
     border: none;
     border-radius: 4px;
     cursor: pointer;
-    transition: background-color 0.3s; /* Transición suave al cambiar el color de fondo */
 }
 
 .modal-buttons button:first-child {

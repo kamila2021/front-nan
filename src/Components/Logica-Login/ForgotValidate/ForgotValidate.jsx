@@ -1,17 +1,20 @@
 import React, { useState } from 'react';
 import './ForgotValidate.css';
 
-const ForgotValidate = ({ email, onBackToLogin }) => {
+const ForgotValidate = ({ email, onBackToLogin, userType }) => {
     const [code, setCode] = useState('');
     const [newPassword, setNewPassword] = useState('');
     const [confirmPassword, setConfirmPassword] = useState('');
     const [errorMessage, setErrorMessage] = useState('');
     const [successMessage, setSuccessMessage] = useState('');
 
-    const handleSubmit = (e) => {
+    // Log para depuración
+    console.log('userType:', userType);
+
+    const handleSubmit = async (e) => {
         e.preventDefault();
 
-        // Aquí iría la lógica para validar el código y permitir el cambio de contraseña
+        // Validaciones
         if (!code) {
             setErrorMessage('Por favor ingrese el código.');
             return;
@@ -22,9 +25,73 @@ const ForgotValidate = ({ email, onBackToLogin }) => {
             return;
         }
 
+        // Validación del userType
+        if (!userType) {
+            setErrorMessage('Tipo de usuario no válido.');
+            return;
+        }
+
         setErrorMessage('');
-        setSuccessMessage('Contraseña actualizada con éxito.');
-        // Aquí iría la lógica para actualizar la contraseña en el servidor
+
+        let verifyEndpoint = '';
+        let resetEndpoint = '';
+
+        // Determina las endpoints basadas en userType
+        switch (userType) {
+            case 'student':
+                verifyEndpoint = `http://192.168.0.15:3000/student/verify-password-recovery/${email}`;
+                resetEndpoint = `http://192.168.0.15:3000/student/reset-password-recovery/${email}`;
+                break;
+            case 'professor':
+                verifyEndpoint = `http://192.168.0.15:3000/professor/verify-password-recovery/${email}`;
+                resetEndpoint = `http://192.168.0.15:3000/professor/reset-password-recovery/${email}`;
+                break;
+            case 'parent':
+                verifyEndpoint = `http://192.168.0.15:3000/parent/verify-password-recovery/${email}`;
+                resetEndpoint = `http://192.168.0.15:3000/parent/reset-password-recovery/${email}`;
+                break;
+            default:
+                setErrorMessage('Tipo de usuario no válido.');
+                return;
+        }
+
+        try {
+            // Verificar el código de recuperación
+            const verifyResponse = await fetch(verifyEndpoint, {
+                method: 'PATCH',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ code }), // Envía el código al servidor
+            });
+
+            if (!verifyResponse.ok) {
+                const errorData = await verifyResponse.json();
+                setErrorMessage(errorData.message || 'Error al verificar el código.');
+                return;
+            }
+
+            // Si el código es verificado, procede a restablecer la contraseña
+            const resetResponse = await fetch(resetEndpoint, {
+                method: 'PATCH',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ code, newPassword }), // Envía el código y nueva contraseña
+            });
+
+            if (resetResponse.ok) {
+                setSuccessMessage('Contraseña actualizada con éxito.');
+                setErrorMessage('');
+            } else {
+                const errorData = await resetResponse.json();
+                setErrorMessage(errorData.message || 'Error al restablecer la contraseña.');
+                setSuccessMessage('');
+            }
+        } catch (error) {
+            setErrorMessage('Error de conexión. Inténtelo de nuevo más tarde.');
+            setSuccessMessage('');
+        }
     };
 
     return (

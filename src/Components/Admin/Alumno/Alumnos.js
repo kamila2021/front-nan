@@ -206,7 +206,7 @@ const Alumnos = () => {
         setParentId(''); // Resetear ID del padre al crear nuevo
     };
 
-    const handleEdit = (alumno) => {
+    const handleRowClick = (alumno) => {
         setCurrentAlumno(alumno);
         setName(alumno.name); // Cargar el nombre actual
         setEmail(alumno.email); // Cargar el email actual
@@ -244,7 +244,9 @@ const Alumnos = () => {
                     value={searchTerm}
                     onChange={(e) => setSearchTerm(e.target.value)}
                 />
-                <button onClick={handleNew}>Nuevo Alumno</button>
+                <button className="new-alumno" onClick={handleNew}>
+                    <i className="fas fa-plus"></i> {/* Ícono de más */}
+                </button>
             </div>
             <table className="alumnos-table">
                 <thead>
@@ -263,9 +265,13 @@ const Alumnos = () => {
                             <td>{alumno.name}</td>
                             <td>{alumno.email}</td>
                             <td>{alumno.level}</td>
-                            <td>
-                                <button onClick={() => handleEdit(alumno)}>Editar</button>
-                                <button onClick={() => handleDelete(alumno)}>Eliminar</button>
+                            <td> 
+                                <button onClick={(e) => {e.stopPropagation(); handleRowClick(alumno);}}>
+                                    <i className="fas fa-edit"></i> {/* Icono para editar */}
+                                </button>
+                                <button onClick={(e) => {e.stopPropagation(); handleDelete(alumno);}}>
+                                    <i className="fas fa-trash"></i> {/* Icono para eliminar */}
+                                </button>
                             </td>
                         </tr>
                     ))}

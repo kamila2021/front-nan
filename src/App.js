@@ -1,25 +1,29 @@
 import React, { useState, useEffect } from "react";
-import Navbar from './Components/Navbar/Navbar';
+import MainNav from "./Components/Navbar/MainNav"; 
+import MisHijos from "./Components/PaginaApoderado/Alumno/MisHijos"; 
 import LoginForm from './Components/Logica-Login/LoginForm/LoginForm';
 import ForgotForm from './Components/Logica-Login/ForgotPasswordForm/ForgotForm';
 import ForgotValidate from './Components/Logica-Login/ForgotValidate/ForgotValidate';
-import ImageBanner from './Components/Banner/Banner'; // Importa el banner
-import Alumnos from './Components/Alumno/Alumnos'; // Importa el componente de alumnos
-import Profesores from './Components/Profesor/Profesores'; // Importa el componente de profesores
-import Apoderados from './Components/Apoderado/Apoderados'; // Importa el componente de apoderados
-import './Components/Botones/Boton.css'; // Si Boton.css está en la misma carpeta que App.js
-import './App.css'; // Asegúrate de tener un archivo CSS para los estilos globales.
+import ImageBanner from './Components/Banner/Banner';
+import Alumnos from "./Components/Admin/Alumno/Alumnos";
+import Profesores from "./Components/Admin/Profesor/Profesores";
+import Apoderados from "./Components/Admin/Apoderado/Apoderados";
+import './Components/Botones/Boton.css'; 
+import './App.css'; 
+import Asignaturas from "./Components/Admin/Asignaturas/Asignaturas";
 
 function App() {
     const [screen, setScreen] = useState('login');
     const [email, setEmail] = useState('');
-    const [isAuthenticated, setIsAuthenticated] = useState(false); // Nuevo estado para manejar autenticación
+    const [userType, setUserType] = useState(''); 
+    const [isAuthenticated, setIsAuthenticated] = useState(false); 
 
     useEffect(() => {
-        const token = localStorage.getItem('token'); // Revisa si hay un token almacenado
+        const token = localStorage.getItem('token');
         if (token) {
-            setIsAuthenticated(true); // Si hay un token, el usuario está autenticado
-            setScreen('admin'); // Redirigir a la pantalla admin si hay token
+            setIsAuthenticated(true);
+            setUserType('admin'); // Cambia esto según sea necesario
+            setScreen('admin'); 
         }
     }, []);
 
@@ -27,8 +31,9 @@ function App() {
         setScreen('forgot');
     };
 
-    const handleCodeSent = (email) => {
+    const handleCodeSent = (email, userType) => {
         setEmail(email);
+        setUserType(userType); 
         setScreen('validate');
     };
 
@@ -36,28 +41,37 @@ function App() {
         setScreen('login');
     };
 
-    const handleLoginSuccess = () => {
-        setIsAuthenticated(true); // Cambia el estado a autenticado
-        localStorage.setItem('token', 'someAuthToken'); // Almacena el token de autenticación
-        setScreen('admin');
+    const handleLoginSuccess = (userType) => {
+        console.log("User type:", userType); // Para depuración
+        setUserType(userType); 
+        setIsAuthenticated(true); 
+        localStorage.setItem('token', 'someAuthToken'); 
+        
+        // Cambiar a la pantalla de inicio si es padre
+        if (userType === 'parent') {
+            setScreen('inicio'); 
+        } else {
+            setScreen(userType === 'professor' ? 'profesores' : 'admin'); 
+        }
     };
-
+    
     const handleNavigate = (section) => {
+        console.log("Navegando a:", section); 
         setScreen(section);
     };
 
     const handleLogout = () => {
-        setIsAuthenticated(false); // Cambia el estado a no autenticado
-        localStorage.removeItem('token'); // Elimina el token del localStorage
-        setScreen('login'); // Redirigir al login después de cerrar sesión
+        setIsAuthenticated(false); 
+        localStorage.removeItem('token'); 
+        setScreen('login'); 
     };
 
     return (
         <div>
-            {/* El Navbar se muestra en todas las pantallas excepto en la de login */}
-            {screen !== 'login' && (
-                <Navbar 
-                    currentScreen={screen}  // Pasamos la pantalla actual al Navbar
+            {isAuthenticated && (
+                <MainNav 
+                    userType={userType} 
+                    currentScreen={screen}
                     onNavigate={handleNavigate} 
                     onLogout={handleLogout} 
                 />
@@ -76,39 +90,50 @@ function App() {
                 {screen === 'forgot' && <ForgotForm onBackToLogin={handleBackToLogin} onCodeSent={handleCodeSent} />}
                 
                 {/* Pantalla de Validación de Código */}
-                {screen === 'validate' && <ForgotValidate email={email} onBackToLogin={handleBackToLogin} />}
-                
-                {/* Pantalla de Alumnos */}
-                {screen === 'alumnos' && <Alumnos />}
+                {screen === 'validate' && 
+                    <ForgotValidate 
+                        email={email} 
+                        userType={userType} 
+                        onBackToLogin={handleBackToLogin} 
+                    />
+                }
 
-                {/* Pantalla de Profesores */}
+                {/* Pantallas de Alumnos, Profesores y Apoderados */}
+                {screen === 'alumnos' && <Alumnos />}
                 {screen === 'profesores' && <Profesores />}
+                {screen === 'apoderados' && <Apoderados />}
+                   {/* Componente de Asignaturas, siempre visible para admin */}
+                 {screen === 'asignaturas' && <Asignaturas />}
                 
-                {/* Pantalla de Apoderados */}
-                {screen === 'apoderados' && <Apoderados />} {/* Agregando la pantalla de Apoderados */}
-               
+                {/* Pantalla de Mis Hijos Matriculados */}
+                {screen === 'misHijos' && <MisHijos />}
+                  
+
                 {/* Pantalla de Inicio */}
                 {screen === 'inicio' && (
                     <div className="inicio-container">
                         <ImageBanner />
                         <div className="inicio-buttons">
                             <button className="agenda-button" onClick={() => handleNavigate('agenda')}>Agenda Escolar</button>
-                            <button className="subject-button" onClick={() => handleNavigate('asignatura')}>Asignatura</button>
+                            {userType === 'parent' && (
+                                <button className="Mi-Alumno" onClick={() => handleNavigate('misHijos')}>Mi Alumno</button>
+                            )}
                         </div>
                     </div>
                 )}
-            </div>
 
-            {/* Banner de imágenes y botones para el admin */}
-            {screen === 'admin' && (
-                <>
-                    <ImageBanner />
-                    <div className="button-container">
-                        <button className="agenda-button" onClick={() => handleNavigate('agenda')}>Agenda Escolar</button>
-                        <button className="subject-button" onClick={() => handleNavigate('asignatura')}>Asignatura</button>
-                    </div>
-                </>
-            )}
+                {/* Banner de imágenes y botones para el admin */}
+                {screen === 'admin' && (
+                    <>
+                        <ImageBanner />
+                        <div className="button-container">
+                            <button className="agenda-button" onClick={() => handleNavigate('agenda')}>Agenda Escolar</button>
+                        </div>
+                    </>
+                )}
+
+             
+            </div>
         </div>
     );
 }

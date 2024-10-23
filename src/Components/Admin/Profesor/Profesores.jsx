@@ -1,6 +1,7 @@
-import { useState, useEffect } from 'react';
+// Components/Profesores.js
+import React, { useState, useEffect } from 'react';
+import './Profesores.css';
 import axios from 'axios';
-import './Apoderados.css';
 
 // Funciones de validación
 export const validateEmail = (email) => {
@@ -15,59 +16,58 @@ export const validateName = (name) => {
 export const validatePassword = (password) => {
     return password.length >= 6; // O cualquier otra regla que desees
 };
-
-const Apoderados = () => {
+const Profesores = () => {
     const [name, setName] = useState('');
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
-    const [apoderados, setApoderados] = useState([]);
+    const [profesores, setProfesores] = useState([]);
     const [searchTerm, setSearchTerm] = useState('');
     const [editMode, setEditMode] = useState(false);
-    const [currentApoderado, setCurrentApoderado] = useState(null);
+    const [currentProfesor, setCurrentProfesor] = useState(null);
     const [showModal, setShowModal] = useState(false);
 
-    // Cargar los apoderados existentes cuando el componente se monta
-    useEffect(() => {
-        const fetchApoderados = async () => {
+     // Cargar los profesores  existentes cuando el componente se monta
+     useEffect(() => {
+        const fetchProfesores = async () => {
             try {
-                const response = await axios.get('http://192.168.0.15:3000/parent');
-                setApoderados(response.data);
+                const response = await axios.get('http://192.168.0.15:3000/professor');
+                setProfesores(response.data);
             } catch (error) {
-                console.error('Error al cargar apoderados:', error);
+                console.error('Error al cargar profesores:', error);
             }
         };
-        fetchApoderados();
+        fetchProfesores();
     }, []);
 
-   // Manejar el registro de un nuevo apoderado
+    // Manejar el registro de un nuevo profesor
     const handleRegister = async () => {
-        const newApoderado = { name, email, password };
+        const newProfesor = { name, email, password };
 
         // Validaciones
-        if (!validateName(newApoderado.name)) {
+        if (!validateName(newProfesor.name)) {
             console.log('Error', 'Ingrese un nombre válido');
             return;
         }
-        if (!validateEmail(newApoderado.email)) {
+        if (!validateEmail(newProfesor.email)) {
             console.log('Error', 'Ingrese un correo válido');
             return;
         }
-        if (!validatePassword(newApoderado.password)) {
+        if (!validatePassword(newProfesor.password)) {
             console.log('Error', 'Ingrese una contraseña válida');
             return;
         }
 
         try {
-            const response = await fetch('http://192.168.0.15:3000/parent', {
+            const response = await fetch ('http://192.168.0.15:3000/professor', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
                 },
-                body: JSON.stringify(newApoderado),
+                body: JSON.stringify(newProfesor),
             });
             const data = await response.json();
-            console.log('Apoderado registrado:', data);
-            setApoderados((prev) => [...prev, data]); // Actualiza la lista con el nuevo apoderado
+            console.log('Profesor registrado:', response.data);
+            setProfesores((prev) => [...prev, data]); // Actualiza la lista con el nuevo profesor
             handleCloseModal(); // Cierra el modal después de guardar
         } catch (error) {
             console.log('Error de servidor', error.response ? error.response.data : error);
@@ -76,65 +76,48 @@ const Apoderados = () => {
             }
         }
     };
+
+    // Manejar la actualización de un profesor
     const handleUpdate = async () => {
-        if (!currentApoderado || !currentApoderado.id_parent) {
-            console.error("ID del apoderado no proporcionado para actualización");
-            return;
+        
+        if (!currentProfesor || !currentProfesor.id_professor) {
+            console.error("ID del profesor no proporcionado para actualización");
+            return; // Asegúrate de que el id esté definido
         }
 
-        const updatedApoderado = { name, email }; // No incluir la contraseña
+        const updatedProfesor= { name, email };
 
         // Validaciones
-        if (!validateName(updatedApoderado.name)) {
+        if (!validateName(updatedProfesor.name)) {
             console.log('Error', 'Ingrese un nombre válido');
             return;
         }
-        if (!validateEmail(updatedApoderado.email)) {
+        if (!validateEmail(updatedProfesor.email)) {
             console.log('Error', 'Ingrese un correo válido');
             return;
         }
-
+      
         try {
-            const response = await fetch(`http://192.168.0.15:3000/parent/${currentApoderado.id_parent}`, {
+            const response = await fetch(`http://192.168.0.15:3000/professor/${currentProfesor.id_professor}`, {
                 method: 'PATCH',
                 headers: {
                     'Content-Type': 'application/json',
                 },
-                body: JSON.stringify(updatedApoderado),
+                body: JSON.stringify(updatedProfesor),
             });
-
+        
             if (!response.ok) {
                 throw new Error(`HTTP error! status: ${response.status}`);
             }
-
+        
             const data = await response.json();
-            console.log('Apoderado actualizado:', data);
-            setApoderados((prev) => 
-                prev.map(apoderado => apoderado.id_parent === currentApoderado.id_parent ? { ...apoderado, ...data } : apoderado)
+            console.log('Profesor actualizado:', data);
+            setProfesores((prev) => 
+                prev.map(profesor => profesor.id_professor === currentProfesor.id_professor ? { ...profesor, ...data } : profesor)
             );
             handleCloseModal(); // Cierra el modal después de actualizar
         } catch (error) {
             console.log('Error de servidor', error.message);
-        }
-    };
-
-    const handleDelete = async (apoderado) => {
-        if (!apoderado || !apoderado.id_parent) {
-            console.error("ID del apoderado no proporcionado para eliminar");
-            return; // Salir si no hay apoderado seleccionado
-        }
-
-        const idToDelete = apoderado.id_parent; // Guarda el ID del apoderado a eliminar
-        console.log("ID del apoderado a eliminar:", idToDelete);
-
-        try {
-            // Realiza la solicitud DELETE
-            const response = await axios.delete(`http://192.168.0.15:3000/parent/${idToDelete}`);
-            // Actualiza la lista de apoderados en el estado
-            setApoderados((prevApoderados) => prevApoderados.filter((item) => item.id_parent !== idToDelete));
-            console.log("Apoderado eliminado:", response.data);
-        } catch (error) {
-            console.error("Error eliminando apoderado:", error.response ? error.response.data : error.message);
         }
     };
 
@@ -147,43 +130,72 @@ const Apoderados = () => {
         setPassword('');
     };
 
-    const handleEdit = (apoderado) => {
-        setCurrentApoderado(apoderado);
-        setName(apoderado.name); // Cargar el nombre actual
-        setEmail(apoderado.email); // Cargar el email actual
-        setPassword(''); // Resetea la contraseña (no se puede editar)
+    // Manejar la selección de un profesor de la lista para editar
+    const handleRowClick = (profesor) => {
+        console.log(profesor)
+        setCurrentProfesor(profesor); // Almacena el profesor actual, que incluye su ID
+        setName(profesor.name);
+        setEmail(profesor.email);
+        setPassword(profesor.password);
         setEditMode(true);
         setShowModal(true);
+    };
+
+
+    const handleDelete = async (profesor) => {
+        // Asegúrate de que el profesor tenga un id válido
+        if (!profesor || !profesor.id_professor) {
+            console.error("ID del profesor no proporcionado para eliminar");
+            return; // Salir si no hay profesor seleccionado
+        }
+    
+        const idToDelete = profesor.id_professor; // Guarda el ID del apoderado a eliminar
+        console.log("ID del profesor a eliminar:", idToDelete);
+    
+        try {
+            // Realiza la solicitud DELETE
+            const response = await axios.delete(`http://10.115.75.137:3000/professor/${idToDelete}`);
+            
+            // Actualiza la lista de apoderados en el estado
+            setProfesores((prevProfesores) =>
+                prevProfesores.filter((item) => item.id_professor !== idToDelete)
+            );
+    
+            console.log("Profesor eliminado:", response.data);
+        } catch (error) {
+            // Manejo de errores más descriptivo
+            console.error("Error eliminando profesor:", error.response ? error.response.data : error.message);
+        }
     };
 
     // Cerrar el modal
     const handleCloseModal = () => {
         setShowModal(false);
         setEditMode(false);
-        setCurrentApoderado(null);
+        setCurrentProfesor(null);
         setName('');
         setEmail('');
         setPassword('');
     };
 
     // Filtrar apoderados basados en el término de búsqueda
-    const filteredApoderados = apoderados.filter(apoderado =>
-        apoderado.name.toLowerCase().includes(searchTerm.toLowerCase())
+    const filteredProfesores = profesores.filter(profesor =>
+        profesor.name.toLowerCase().includes(searchTerm.toLowerCase())
     );
 
     return (
-        <div className="apoderados-container">
-            <h2 className="title">Lista de Apoderados</h2>
+        <div className="profesores-container">
+            <h2 className="title">Lista de Profesores</h2>
             <div className="top-bar">
                 <div className="search-container">
                     <input
                         type="text"
-                        placeholder="Buscar apoderado..."
+                        placeholder="Buscar profesor..."
                         value={searchTerm}
                         onChange={(e) => setSearchTerm(e.target.value)}
                     />
                 </div>
-                <button className="new-apoderado" onClick={handleNew}>
+                <button className="new-profesor" onClick={handleNew}>
                     <i className="fas fa-plus"></i> {/* Ícono de más */}
                 </button>
             </div>
@@ -197,15 +209,15 @@ const Apoderados = () => {
                     </tr>
                 </thead>
                 <tbody>
-                    {filteredApoderados.map((apoderado) => (
-                        <tr key={apoderado.id_parent} onClick={() => setCurrentApoderado(apoderado)}>
-                            <td>{apoderado.name}</td>
-                            <td>{apoderado.email}</td>
+                    {filteredProfesores.map((profesor) => (
+                        <tr key={profesor.id} onClick={() => handleRowClick(profesor)}> {/* Evento onClick para capturar el ID del usuario */}
+                            <td>{profesor.name}</td>
+                            <td>{profesor.email}</td>
                             <td>
-                                <button onClick={(e) => { e.stopPropagation(); handleEdit(apoderado); }}>
+                                <button onClick={(e) => {e.stopPropagation(); handleRowClick(profesor);}}>
                                     <i className="fas fa-edit"></i> {/* Icono para editar */}
                                 </button>
-                                <button onClick={(e) => { e.stopPropagation(); handleDelete(apoderado); }}>
+                                <button onClick={(e) => {e.stopPropagation(); handleDelete(profesor);}}>
                                     <i className="fas fa-trash"></i> {/* Icono para eliminar */}
                                 </button>
                             </td>
@@ -218,7 +230,7 @@ const Apoderados = () => {
             {showModal && (
                 <div className="modal">
                     <div className="modal-content">
-                        <h3>{editMode ? 'Editando Apoderado' : 'Creando Nuevo Apoderado'}</h3>
+                        <h3>{editMode ? 'Editando profesor' : 'Creando Nuevo profesor'}</h3>
                         <form className="form-modal" onSubmit={(e) => {
                             e.preventDefault();
                             if (editMode) {
@@ -231,7 +243,7 @@ const Apoderados = () => {
                             <input
                                 type="text"
                                 id="nombre"
-                                placeholder="Ingrese el nombre del apoderado"
+                                placeholder="Ingrese el nombre del profesor"
                                 value={name}
                                 onChange={(e) => setName(e.target.value)}
                                 required
@@ -249,12 +261,15 @@ const Apoderados = () => {
 
                             <label htmlFor="password">Clave:</label>
                             <input
-                                type="text" // Cambiado a "text" para mostrar la contraseña
+                                type="password" // Cambiado a "password" para ocultar la contraseña
                                 id="password"
-                                placeholder="Contraseña (no editable)"
-                                value={password}
-                                readOnly // Este campo es solo para lectura
+                                placeholder="Contraseña"
+                                value={editMode ? '' : password} // Solo permite ingresar contraseña si no está en modo edición
+                                onChange={(e) => !editMode && setPassword(e.target.value)} // Permitir cambios solo en el registro
+                                required={!editMode} // Requerir contraseña solo en el registro
+                                readOnly={editMode} // Solo lectura en modo de edición
                             />
+
 
                             <div className="modal-buttons">
                                 <button type="submit">{editMode ? 'Actualizar' : 'Guardar'}</button>
@@ -268,4 +283,4 @@ const Apoderados = () => {
     );
 };
 
-export default Apoderados;
+export default Profesores;

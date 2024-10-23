@@ -1,23 +1,23 @@
-/* Agrega estos estilos a tu archivo CSS existente o crea uno nuevo */
 .button-container {
     display: flex;
-    justify-content: center; /* Centrar horizontalmente */
-    align-items: center; /* Centrar verticalmente si es necesario */
+    justify-content: space-between; /* Distribuir espacio entre botones */
+    align-items: center;
     margin-top: 20px; /* Espacio entre el banner y los botones */
 }
 
-.agenda-button, .subject-button {
-    background-color:  #acacac; /* Color de fondo azul */
-    color:#fff ; /* Color del texto blanco */
+.agenda-button, .subject-button, .chat-button { /* Agregar chat-button aquí */
+    background-color: #acacac; /* Color de fondo gris */
+    color: #fff; /* Color del texto blanco */
     border: none; /* Sin borde */
     border-radius: 5px; /* Bordes redondeados */
     padding: 10px 20px; /* Espaciado interno */
-    margin: 0 10px; /* Espaciado entre botones */
     font-size: 16px; /* Tamaño de fuente */
     cursor: pointer; /* Cambia el cursor al pasar el mouse */
     transition: background-color 0.3s; /* Animación al pasar el mouse */
+    flex: 1; /* Permite que los botones crezcan para ocupar el espacio disponible */
+    margin: 0 5px; /* Espaciado entre botones */
 }
 
-.agenda-button:hover, .subject-button:hover {
-    background-color: #acacac; /* Color más oscuro al pasar el mouse */
+.agenda-button:hover, .subject-button:hover, .chat-button:hover {
+    background-color: #8b8b8b; /* Color más oscuro al pasar el mouse */
 }

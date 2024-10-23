@@ -3,6 +3,7 @@ import './ForgotForm.css';
 
 const ForgotForm = ({ onBackToLogin, onCodeSent }) => {
     const [email, setEmail] = useState('');
+    const [userType, setUserType] = useState(''); // Por defecto se selecciona "alumno"
     const [errorMessage, setErrorMessage] = useState('');
     const [successMessage, setSuccessMessage] = useState('');
 
@@ -11,7 +12,7 @@ const ForgotForm = ({ onBackToLogin, onCodeSent }) => {
         return re.test(email);
     };
 
-    const handleSubmit = (e) => {
+    const handleSubmit = async (e) => {
         e.preventDefault();
         if (!email) {
             setErrorMessage('Por favor ingrese su correo.');
@@ -21,19 +22,66 @@ const ForgotForm = ({ onBackToLogin, onCodeSent }) => {
             setErrorMessage('Por favor ingrese un correo válido.');
             return;
         }
-        setErrorMessage('');
-        setSuccessMessage('Se ha enviado un código de recuperación a su correo.');
-        
-        // Simula el envío del código
-        setTimeout(() => {
-            onCodeSent(email); // Aquí se llama la prop onCodeSent para pasar el email al componente principal
-        }, 2000);
+
+        let apiEndpoint = '';
+
+        switch (userType) {
+            case 'student':
+                apiEndpoint = `http://192.168.0.15:3000/student/initial-password-recovery${email}`;
+                break;
+            case 'professor':
+                apiEndpoint = `http://192.168.0.15:3000/professor/initial-password-recovery${email}`;
+                break;
+            case 'parent':
+                apiEndpoint = `http://192.168.0.15:3000/parent/initial-password-recovery${email}`;
+                break;
+            default:
+                setErrorMessage('Tipo de usuario no válido.');
+                return;
+        }
+
+        try {
+            console.log(userType)
+            const response = await fetch(apiEndpoint, {
+                method: 'PATCH',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ email,userType}), // Asegúrate de que aquí no hay ningún problema
+            });
+
+            if (response.ok) {
+                const data = await response.json();
+                setSuccessMessage('Se ha enviado un código de recuperación a su correo.');
+                setErrorMessage('');
+                console.log(userType);
+                onCodeSent(email, userType); // Esta función puede ser usada para cambiar la pantalla
+            } else {
+                const errorData = await response.json();
+                setErrorMessage(errorData.message || 'Error al enviar el código de recuperación.');
+                setSuccessMessage('');
+            }
+        } catch (error) {
+            setErrorMessage('Error de conexión. Inténtelo de nuevo más tarde.');
+            setSuccessMessage('');
+        }
     };
 
     return (
         <div className='wrapper'>
             <form onSubmit={handleSubmit}>
                 <h1>Recuperar Contraseña</h1>
+                
+                {/* Selector de tipo de usuario */}
+        <div className='input-box'>
+             <select className='user-type-select' value={userType} onChange={(e) => setUserType(e.target.value)} required>
+         <option value="">Selecciona tipo de usuario</option>
+        <option value="student">Estudiante</option>
+        <option value="parent">Padre</option>
+        <option value="professor">Profesor</option>
+    </select>
+        </div>
+
                 <div className='input-box'>
                     <input
                         type='text'
@@ -43,8 +91,10 @@ const ForgotForm = ({ onBackToLogin, onCodeSent }) => {
                         required
                     />
                 </div>
+
                 {errorMessage && <p className='error-message'>{errorMessage}</p>}
                 {successMessage && <p className='success-message'>{successMessage}</p>}
+
                 <button type='submit'>Enviar</button>
                 <button type='button' onClick={onBackToLogin}>Volver al Login</button>
             </form>

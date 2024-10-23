@@ -17,14 +17,14 @@ const LoginForm = ({ onForgotPasswordClick, onLoginSuccess }) => {
     const handleSubmit = async (e) => {
         e.preventDefault();
 
-        if (!email || !password) {
-            setErrorMessage('Debe completar el correo y la contraseña.');
+        if (!email || !password || !userType) {
+            setErrorMessage('Debe completar el correo, la contraseña y seleccionar un tipo de usuario.');
             return;
         }
 
         // Validación local para el usuario "admin"
-        if (email === 'admin' && password === 'admin') {
-            onLoginSuccess();  // Llama a la función para redirigir al portal del admin
+        if (email === 'admin' && password === 'admin' && userType === 'admin') {
+            onLoginSuccess(userType);  // Llama a la función para redirigir al portal del admin
             return;
         }
 
@@ -33,7 +33,7 @@ const LoginForm = ({ onForgotPasswordClick, onLoginSuccess }) => {
             const response = await axios.post('http://localhost:3000/auth/login', {
                 email,
                 password,
-                userType, // Asegurarse de enviar el tipo de usuario seleccionado (Student, Parent, Professor)
+                userType, // Enviar el tipo de usuario seleccionado
             });
 
             const { accessToken, refreshToken } = response.data;
@@ -41,7 +41,7 @@ const LoginForm = ({ onForgotPasswordClick, onLoginSuccess }) => {
             // Aquí puedes manejar el éxito del login y guardar los tokens si es necesario
             console.log('Login exitoso', accessToken, refreshToken);
 
-            onLoginSuccess();  // Redirigir a la página principal tras el login exitoso
+            onLoginSuccess(userType);  // Redirigir a la página principal tras el login exitoso
         } catch (error) {
             console.error('Error en el login:', error.response ? error.response.data : error.message);
             setErrorMessage('Usuario o contraseña incorrectos.');
@@ -51,7 +51,7 @@ const LoginForm = ({ onForgotPasswordClick, onLoginSuccess }) => {
     return (
         <div className='wrapper'>
             <form onSubmit={handleSubmit}>
-                <h1>Inicio Sesion</h1>
+                <h1>Inicio Sesión</h1>
                 <div className='input-box'>
                     <input
                         type='text'
@@ -75,11 +75,17 @@ const LoginForm = ({ onForgotPasswordClick, onLoginSuccess }) => {
 
                 {/* Selector de tipo de usuario */}
                 <div className='input-box'>
-                    <select value={userType} onChange={(e) => setUserType(e.target.value)} required>
+                    <select 
+                        className='user-type-select' 
+                        value={userType} 
+                        onChange={(e) => setUserType(e.target.value)} 
+                        required
+                    >
                         <option value="">Selecciona tipo de usuario</option>
                         <option value="student">Estudiante</option>
                         <option value="parent">Padre</option>
                         <option value="professor">Profesor</option>
+                        <option value="admin">Admin</option> {/* Opción añadida para admin */}
                     </select>
                 </div>
 

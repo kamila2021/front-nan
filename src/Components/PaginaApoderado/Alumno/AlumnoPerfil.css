@@ -1,0 +1,32 @@
+/* src/Components/Alumno/AlumnoPerfil.css */
+
+.alumno-perfil {
+    border: 1px solid #ccc;
+    padding: 16px;
+    margin-top: 20px;
+    border-radius: 8px;
+    background-color: #f9f9f9;
+}
+
+h2 {
+    color: #333;
+}
+
+.button-container {
+    margin-top: 20px;
+}
+
+.button-container button {
+    margin-right: 10px;
+    padding: 10px 15px;
+    border: none;
+    border-radius: 5px;
+    background-color: #007bff; /* Color de fondo azul */
+    color: #fff; /* Texto blanco */
+    cursor: pointer;
+    transition: background-color 0.3s;
+}
+
+.button-container button:hover {
+    background-color: #0056b3; /* Color más oscuro al pasar el mouse */
+}
