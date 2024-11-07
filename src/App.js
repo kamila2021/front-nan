@@ -11,19 +11,26 @@ import Apoderados from "./Components/Admin/Apoderado/Apoderados";
 import './Components/Botones/Boton.css'; 
 import './App.css'; 
 import Asignaturas from "./Components/Admin/Asignaturas/Asignaturas";
-
+import MisAsignaturas from "./Components/PaginaProfesor/Asignatura/MisAsignaturas";
+import Asistencia from "./Components/PaginaProfesor/Asistencia/Asistencia";
 function App() {
     const [screen, setScreen] = useState('login');
     const [email, setEmail] = useState('');
-    const [userType, setUserType] = useState(''); 
-    const [isAuthenticated, setIsAuthenticated] = useState(false); 
+    const [userType, setUserType] = useState('');
+    const [isAuthenticated, setIsAuthenticated] = useState(false);
 
     useEffect(() => {
+        // Al cargar la página, recuperamos los datos de localStorage
         const token = localStorage.getItem('token');
-        if (token) {
+        const storedUserType = localStorage.getItem('userType');
+        
+        // Si hay un token y un userType, el usuario está autenticado
+        if (token && storedUserType) {
             setIsAuthenticated(true);
-            setUserType('admin'); // Cambia esto según sea necesario
-            setScreen('admin'); 
+            setUserType(storedUserType); 
+            setScreen(storedUserType === 'parent' ? 'inicio' : storedUserType); // Redirige según el tipo de usuario
+        } else {
+            setScreen('login'); // Si no hay token, redirige al login
         }
     }, []);
 
@@ -33,7 +40,7 @@ function App() {
 
     const handleCodeSent = (email, userType) => {
         setEmail(email);
-        setUserType(userType); 
+        setUserType(userType);
         setScreen('validate');
     };
 
@@ -44,26 +51,30 @@ function App() {
     const handleLoginSuccess = (userType) => {
         console.log("User type:", userType); // Para depuración
         setUserType(userType); 
-        setIsAuthenticated(true); 
-        localStorage.setItem('token', 'someAuthToken'); 
+        setIsAuthenticated(true);
         
-        // Cambiar a la pantalla de inicio si es padre
+        // Guardar los datos en localStorage
+     
+        localStorage.setItem('userType', userType);
+        
+        // Cambiar a la pantalla correspondiente según el tipo de usuario
         if (userType === 'parent') {
-            setScreen('inicio'); 
+            setScreen('inicio');
         } else {
-            setScreen(userType === 'professor' ? 'profesores' : 'admin'); 
+            setScreen(userType === 'professor' ? 'admin' : 'admin');
         }
     };
-    
+
     const handleNavigate = (section) => {
         console.log("Navegando a:", section); 
         setScreen(section);
     };
 
     const handleLogout = () => {
-        setIsAuthenticated(false); 
+        setIsAuthenticated(false);
         localStorage.removeItem('token'); 
-        setScreen('login'); 
+        localStorage.removeItem('userType'); // También eliminamos el tipo de usuario
+        setScreen('login');
     };
 
     return (
@@ -102,12 +113,16 @@ function App() {
                 {screen === 'alumnos' && <Alumnos />}
                 {screen === 'profesores' && <Profesores />}
                 {screen === 'apoderados' && <Apoderados />}
-                   {/* Componente de Asignaturas, siempre visible para admin */}
-                 {screen === 'asignaturas' && <Asignaturas />}
+                
+                {/* Componente de Asignaturas, siempre visible para admin */}
+                {screen === 'asignaturas' && <Asignaturas />}
                 
                 {/* Pantalla de Mis Hijos Matriculados */}
                 {screen === 'misHijos' && <MisHijos />}
-                  
+
+                {screen === 'misAsignaturas' && <MisAsignaturas />} 
+                {screen === 'asistencia' && <Asistencia />} 
+                
 
                 {/* Pantalla de Inicio */}
                 {screen === 'inicio' && (
@@ -131,8 +146,6 @@ function App() {
                         </div>
                     </>
                 )}
-
-             
             </div>
         </div>
     );

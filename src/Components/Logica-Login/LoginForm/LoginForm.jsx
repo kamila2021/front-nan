@@ -9,6 +9,7 @@ const LoginForm = ({ onForgotPasswordClick, onLoginSuccess }) => {
     const [errorMessage, setErrorMessage] = useState('');
     const [userType, setUserType] = useState(''); // Estado para el tipo de usuario
 
+    // Validación de email
     const validateEmail = (email) => {
         const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
         return re.test(email);
@@ -17,32 +18,74 @@ const LoginForm = ({ onForgotPasswordClick, onLoginSuccess }) => {
     const handleSubmit = async (e) => {
         e.preventDefault();
 
+        // Verificamos que todos los campos estén completos
         if (!email || !password || !userType) {
             setErrorMessage('Debe completar el correo, la contraseña y seleccionar un tipo de usuario.');
             return;
         }
 
-        // Validación local para el usuario "admin"
+        // Limpiar los valores antiguos de localStorage antes de iniciar sesión
+        localStorage.removeItem('accessToken');
+        localStorage.removeItem('refreshToken');
+        localStorage.removeItem('userType');
+        
+        // Verificar si el usuario es admin y la clave también es admin
         if (email === 'admin' && password === 'admin' && userType === 'admin') {
-            onLoginSuccess(userType);  // Llama a la función para redirigir al portal del admin
-            return;
+            // Enviar acceso directo como admin
+            const accessToken = 'dummyAccessTokenForAdmin';  // Token ficticio para admin
+            const refreshToken = 'dummyRefreshTokenForAdmin'; // Token ficticio de refresh para admin
+
+            // Guardar los tokens en localStorage para el admin
+            localStorage.setItem('accessToken', accessToken);  // Guardar el accessToken
+            localStorage.setItem('refreshToken', refreshToken);  // Guardar el refreshToken
+            localStorage.setItem('userType', 'admin');  // Guardar el tipo de usuario como admin
+
+            // Llamamos a onLoginSuccess para redirigir al admin
+            onLoginSuccess('admin');
+            return; // Finalizamos el proceso de login para admin
         }
 
-        // Si no es "admin", hacemos la solicitud al backend
+        // Para otros usuarios, realizar la solicitud de login al backend
         try {
             const response = await axios.post('http://localhost:3000/auth/login', {
                 email,
                 password,
-                userType, // Enviar el tipo de usuario seleccionado
+                userType,
             });
-
+    
             const { accessToken, refreshToken } = response.data;
 
-            // Aquí puedes manejar el éxito del login y guardar los tokens si es necesario
-            console.log('Login exitoso', accessToken, refreshToken);
+            // Verificar si los tokens se recibieron correctamente
+            console.log('Response from server:', response.data);  // Ver los datos completos
+            console.log('Access Token:', accessToken);  // Ver si el accessToken es válido
+            console.log('Refresh Token:', refreshToken); // Ver si el refreshToken es válido
 
-            onLoginSuccess(userType);  // Redirigir a la página principal tras el login exitoso
+            // Validar que los tokens no estén vacíos y tengan el formato adecuado (JWT)
+            if (!accessToken || !refreshToken) {
+                throw new Error('Tokens inválidos recibidos del servidor.');
+            }
+
+            // Verificar si el accessToken tiene la estructura correcta de un JWT (3 partes separadas por '.')
+            if (accessToken.split('.').length !== 3) {
+                throw new Error('El Access Token no tiene el formato adecuado.');
+            }
+
+            // Guardar los tokens en localStorage
+            localStorage.setItem('accessToken', accessToken);  // Guardar el accessToken
+            localStorage.setItem('refreshToken', refreshToken);  // Guardar el refreshToken
+            localStorage.setItem('userType', userType);  // Guardar el tipo de usuario
+
+            // Verificar que los tokens se hayan almacenado correctamente
+            console.log('Tokens almacenados en localStorage:');
+            console.log('Access Token:', localStorage.getItem('accessToken'));
+            console.log('Refresh Token:', localStorage.getItem('refreshToken'));
+            console.log('User Type:', localStorage.getItem('userType'));
+
+            // Llamamos a onLoginSuccess para redirigir al usuario
+            onLoginSuccess(userType);
+
         } catch (error) {
+            // Si el error es por parte del servidor, mostramos el mensaje de error adecuado
             console.error('Error en el login:', error.response ? error.response.data : error.message);
             setErrorMessage('Usuario o contraseña incorrectos.');
         }
@@ -85,7 +128,7 @@ const LoginForm = ({ onForgotPasswordClick, onLoginSuccess }) => {
                         <option value="student">Estudiante</option>
                         <option value="parent">Padre</option>
                         <option value="professor">Profesor</option>
-                        <option value="admin">Admin</option> {/* Opción añadida para admin */}
+                        <option value="admin">Admin</option>
                     </select>
                 </div>
 

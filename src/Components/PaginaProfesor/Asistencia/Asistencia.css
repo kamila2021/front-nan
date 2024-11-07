@@ -1,0 +1,109 @@
+/* Asistencia.css */
+
+.mis-asignaturas {
+    font-family: Arial, sans-serif;
+    margin: 20px;
+  }
+  
+  h1 {
+    font-size: 2rem;
+    color: #333;
+  }
+  
+  .top-bar {
+    margin-bottom: 20px;
+    display: flex;
+    justify-content: flex-start;
+    align-items: center;
+  }
+  
+  .search-container {
+    margin-right: 20px;
+  }
+  
+  .search-container input {
+    padding: 8px;
+    font-size: 1rem;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    width: 250px;
+  }
+  
+  .asignatura-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-bottom: 20px;
+  }
+  
+  .asignatura-table th,
+  .asignatura-table td {
+    padding: 10px;
+    text-align: left;
+    border: 1px solid #ddd;
+  }
+  
+  .asignatura-table th {
+    background-color: #f4f4f4;
+    font-weight: bold;
+  }
+  
+  .asignatura-table tr:hover {
+    background-color: #f1f1f1;
+    cursor: pointer;
+  }
+  
+  .asistencia-container {
+    margin-top: 30px;
+  }
+  
+  .asistencia-container h2 {
+    font-size: 1.5rem;
+    color: #333;
+    margin-bottom: 20px;
+  }
+  
+  .asistencia-table {
+    width: 100%;
+    border-collapse: collapse;
+  }
+  
+  .asistencia-table th,
+  .asistencia-table td {
+    padding: 12px;
+    text-align: left;
+    border: 1px solid #ddd;
+  }
+  
+  .asistencia-table th {
+    background-color: #f4f4f4;
+    font-weight: bold;
+  }
+  
+  button[type="submit"] {
+    background-color: #4CAF50;
+    color: white;
+    padding: 12px 24px;
+    border: none;
+    border-radius: 4px;
+    font-size: 1rem;
+    cursor: pointer;
+    margin-top: 10px;
+  }
+  
+  button[type="submit"]:hover {
+    background-color: #45a049;
+  }
+  
+  select {
+    padding: 6px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+  }
+  
+  .error-message {
+    color: red;
+    font-size: 1rem;
+    margin-top: 20px;
+    text-align: center;
+  }
+  

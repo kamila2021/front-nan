@@ -30,7 +30,7 @@ const Apoderados = () => {
     useEffect(() => {
         const fetchApoderados = async () => {
             try {
-                const response = await axios.get('http://192.168.0.15:3000/parent');
+                const response = await axios.get('http://localhost:3000/parent');
                 setApoderados(response.data);
             } catch (error) {
                 console.error('Error al cargar apoderados:', error);
@@ -58,7 +58,7 @@ const Apoderados = () => {
         }
 
         try {
-            const response = await fetch('http://192.168.0.15:3000/parent', {
+            const response = await fetch('http://localhost:3000/parent', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -95,7 +95,7 @@ const Apoderados = () => {
         }
 
         try {
-            const response = await fetch(`http://192.168.0.15:3000/parent/${currentApoderado.id_parent}`, {
+            const response = await fetch(`http://localhost:3000/parent/${currentApoderado.id_parent}`, {
                 method: 'PATCH',
                 headers: {
                     'Content-Type': 'application/json',
@@ -129,7 +129,7 @@ const Apoderados = () => {
 
         try {
             // Realiza la solicitud DELETE
-            const response = await axios.delete(`http://192.168.0.15:3000/parent/${idToDelete}`);
+            const response = await axios.delete(`http://localhost:3000/parent/${idToDelete}`);
             // Actualiza la lista de apoderados en el estado
             setApoderados((prevApoderados) => prevApoderados.filter((item) => item.id_parent !== idToDelete));
             console.log("Apoderado eliminado:", response.data);

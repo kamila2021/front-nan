@@ -50,7 +50,7 @@ const Alumnos = () => {
     useEffect(() => {
         const fetchParents = async () => {
             try {
-                const response = await axios.get('http://192.168.0.15:3000/parent');
+                const response = await axios.get('http://localhost:3000/parent');
                 setParents(response.data); // Guardar los padres en el estado
             } catch (error) {
                 console.error('Error al cargar padres:', error);
@@ -59,7 +59,7 @@ const Alumnos = () => {
 
         const fetchAlumnos = async () => {
             try {
-                const response = await axios.get('http://192.168.0.15:3000/student');
+                const response = await axios.get('http://localhost:3000/student');
                 setAlumnos(response.data);
             } catch (error) {
                 console.error('Error al cargar alumnos:', error);
@@ -99,7 +99,7 @@ const Alumnos = () => {
         }
 
         try {
-            const response = await fetch('http://192.168.0.15:3000/student', {
+            const response = await fetch('http://localhost:3000/student', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -149,7 +149,7 @@ const Alumnos = () => {
         console.log('Datos enviados para actualización:', requestBody);
     
         try {
-            const response = await fetch(`http://192.168.0.15:3000/student/${currentAlumno.id_student}`, {
+            const response = await fetch(`http://localhost:3000/student/${currentAlumno.id_student}`, {
                 method: 'PATCH',
                 headers: {
                     'Content-Type': 'application/json',
@@ -186,7 +186,7 @@ const Alumnos = () => {
 
         try {
             // Realiza la solicitud DELETE
-            const response = await axios.delete(`http://192.168.0.15:3000/student/${idToDelete}`);
+            const response = await axios.delete(`http://localhost:3000/student/${idToDelete}`);
             // Actualiza la lista de alumnos en el estado
             setAlumnos((prevAlumnos) => prevAlumnos.filter((item) => item.id_student !== idToDelete));
             console.log("Alumno eliminado:", response.data);

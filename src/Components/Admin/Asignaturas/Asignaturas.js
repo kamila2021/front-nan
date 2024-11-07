@@ -64,7 +64,7 @@ const Asignaturas = () => {
     useEffect(() => {
         const fetchAsignaturas = async () => {
             try {
-                const response = await axios.get('http://192.168.0.15:3000/subject');
+                const response = await axios.get('http://localhost:3000/subject');
                 console.log('Asignaturas cargadas:', response.data); // Verifica la estructura aquí
                 setAsignaturas(response.data);
             } catch (error) {
@@ -80,7 +80,7 @@ const Asignaturas = () => {
     useEffect(() => {
         const fetchProfessors = async () => {
             try {
-                const response = await axios.get('http://192.168.0.15:3000/professor');
+                const response = await axios.get('http://localhost:3000/professor');
                 setProfessors(response.data);
             } catch (error) {
                 console.error('Error al cargar profesores:', error);
@@ -96,13 +96,22 @@ const Asignaturas = () => {
             level,
             day,
             block,
-            id_professor:selectedProfessorId
+            id_professor: parseInt(selectedProfessorId, 10),
         };
     
         try {
-            const response = await axios.post('http://192.168.0.15:3000/subject', newAsignatura);
-            setAsignaturas((prev) => [...prev, response.data]); // Asegúrate de que `response.data` contenga `id_subject`
-            handleCloseModal();
+            console.log(newAsignatura)
+            const response = await fetch ('http://localhost:3000/subject',{
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(newAsignatura),
+            });
+            const data = await response.json();
+            console.log('Asignatura registrado:', data);
+            setAsignaturas((prev) => [...prev, data]); // Actualiza la lista con el nuevo apoderado
+            handleCloseModal(); // Cierra el modal después de guardar
         } catch (error) {
             console.error('Error al registrar:', error.response ? error.response.data : error.message);
         }
@@ -125,7 +134,7 @@ const Asignaturas = () => {
         try {
             console.log("Datos actuales: ",currentAsignatura);
             console.log("Datos nuevos: ", updatedAsignatura);
-            const response = await axios.patch(`http://192.168.0.15:3000/subject/${currentAsignatura.id_subject}`, updatedAsignatura);
+            const response = await axios.patch(`http://localhost:3000/subject/${currentAsignatura.id_subject}`, updatedAsignatura);
             setAsignaturas((prev) => 
                 prev.map(asignatura => asignatura.id_subject === currentAsignatura.id_subject ? { ...asignatura, ...response.data } : asignatura)
             );
@@ -167,7 +176,7 @@ const Asignaturas = () => {
         }
 
         try {
-            await axios.delete(`http://192.168.0.15:3000/subject/${asignatura.id_subject}`);
+            await axios.delete(`http://localhost:3000/subject/${asignatura.id_subject}`);
             setAsignaturas((prevAsignaturas) =>
                 prevAsignaturas.filter((item) => item.id_subject !== asignatura.id_subject)
             );

@@ -39,16 +39,16 @@ const ForgotValidate = ({ email, onBackToLogin, userType }) => {
         // Determina las endpoints basadas en userType
         switch (userType) {
             case 'student':
-                verifyEndpoint = `http://192.168.0.15:3000/student/verify-password-recovery/${email}`;
-                resetEndpoint = `http://192.168.0.15:3000/student/reset-password-recovery/${email}`;
+                verifyEndpoint = `http://localhost:3000/student/verify-password-recovery/${email}`;
+                resetEndpoint = `http://localhost:3000/student/reset-password-recovery/${email}`;
                 break;
             case 'professor':
-                verifyEndpoint = `http://192.168.0.15:3000/professor/verify-password-recovery/${email}`;
-                resetEndpoint = `http://192.168.0.15:3000/professor/reset-password-recovery/${email}`;
+                verifyEndpoint = `http://localhost:3000/professor/verify-password-recovery/${email}`;
+                resetEndpoint = `http://localhost:3000/professor/reset-password-recovery/${email}`;
                 break;
             case 'parent':
-                verifyEndpoint = `http://192.168.0.15:3000/parent/verify-password-recovery/${email}`;
-                resetEndpoint = `http://192.168.0.15:3000/parent/reset-password-recovery/${email}`;
+                verifyEndpoint = `http://localhost:3000/parent/verify-password-recovery/${email}`;
+                resetEndpoint = `http://localhost:3000/parent/reset-password-recovery/${email}`;
                 break;
             default:
                 setErrorMessage('Tipo de usuario no válido.');

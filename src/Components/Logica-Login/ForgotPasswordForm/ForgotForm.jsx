@@ -27,13 +27,13 @@ const ForgotForm = ({ onBackToLogin, onCodeSent }) => {
 
         switch (userType) {
             case 'student':
-                apiEndpoint = `http://192.168.0.15:3000/student/initial-password-recovery${email}`;
+                apiEndpoint = `http://localhost:3000/student/initial-password-recovery${email}`;
                 break;
             case 'professor':
-                apiEndpoint = `http://192.168.0.15:3000/professor/initial-password-recovery${email}`;
+                apiEndpoint = `http://localhost:3000/professor/initial-password-recovery${email}`;
                 break;
             case 'parent':
-                apiEndpoint = `http://192.168.0.15:3000/parent/initial-password-recovery${email}`;
+                apiEndpoint = `http://localhost:3000/parent/initial-password-recovery${email}`;
                 break;
             default:
                 setErrorMessage('Tipo de usuario no válido.');

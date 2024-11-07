@@ -30,7 +30,7 @@ const Profesores = () => {
      useEffect(() => {
         const fetchProfesores = async () => {
             try {
-                const response = await axios.get('http://192.168.0.15:3000/professor');
+                const response = await axios.get('http://localhost:3000/professor');
                 setProfesores(response.data);
             } catch (error) {
                 console.error('Error al cargar profesores:', error);
@@ -58,7 +58,7 @@ const Profesores = () => {
         }
 
         try {
-            const response = await fetch ('http://192.168.0.15:3000/professor', {
+            const response = await fetch ('http://localhost:3000/professor', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -98,7 +98,7 @@ const Profesores = () => {
         }
       
         try {
-            const response = await fetch(`http://192.168.0.15:3000/professor/${currentProfesor.id_professor}`, {
+            const response = await fetch(`http://localhost:3000/professor/${currentProfesor.id_professor}`, {
                 method: 'PATCH',
                 headers: {
                     'Content-Type': 'application/json',
@@ -154,7 +154,7 @@ const Profesores = () => {
     
         try {
             // Realiza la solicitud DELETE
-            const response = await axios.delete(`http://10.115.75.137:3000/professor/${idToDelete}`);
+            const response = await axios.delete(`http://localhost:3000/professor/${idToDelete}`);
             
             // Actualiza la lista de apoderados en el estado
             setProfesores((prevProfesores) =>

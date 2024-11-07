@@ -5,7 +5,7 @@
     margin-top: 20px; /* Espacio entre el banner y los botones */
 }
 
-.agenda-button, .subject-button, .chat-button { /* Agregar chat-button aquí */
+.agenda-button, .Mi-Alumno, .chat-button { /* Agregar chat-button aquí */
     background-color: #acacac; /* Color de fondo gris */
     color: #fff; /* Color del texto blanco */
     border: none; /* Sin borde */
@@ -18,6 +18,6 @@
     margin: 0 5px; /* Espaciado entre botones */
 }
 
-.agenda-button:hover, .subject-button:hover, .chat-button:hover {
+.agenda-button:hover, .Mi-Alumno-button:hover, .chat-button:hover {
     background-color: #8b8b8b; /* Color más oscuro al pasar el mouse */
 }
