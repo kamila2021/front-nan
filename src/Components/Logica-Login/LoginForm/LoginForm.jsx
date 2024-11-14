@@ -141,6 +141,7 @@ const LoginForm = ({ onForgotPasswordClick, onLoginSuccess }) => {
                 {errorMessage && <p className='error-message'>{errorMessage}</p>}
                 <button type='submit'>Login</button>
             </form>
+            
         </div>
     );
 };

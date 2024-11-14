@@ -1,15 +1,15 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import './MisAsignaturas.css';
-import { GrAccessibility } from 'react-icons/gr';
 
 const MisAsignaturas = () => {
-  const [asignaturas, setAsignaturas] = useState([]); // Estado para asignaturas
-  const [students, setStudents] = useState([]); // Estado para los estudiantes de la asignatura seleccionada
+  const [asignaturas, setAsignaturas] = useState([]);
+  const [students, setStudents] = useState([]);
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState(null); // Para manejar errores
-  const [accessToken, setAccessToken] = useState(localStorage.getItem('accessToken'));
-  const [selectedAsignatura, setSelectedAsignatura] = useState(null); // Para almacenar la asignatura seleccionada
+  const [error, setError] = useState(null);
+  const [accessToken] = useState(localStorage.getItem('accessToken'));
+  const [selectedAsignatura, setSelectedAsignatura] = useState(null);
+  const [selectedAlumno, setSelectedAlumno] = useState(null);
 
   useEffect(() => {
     if (accessToken) {
@@ -19,7 +19,6 @@ const MisAsignaturas = () => {
     }
   }, [accessToken]);
 
-  // Fetch para obtener asignaturas
   const fetchAsignaturas = async (accessToken) => {
     if (!accessToken) {
       setError('Token is missing');
@@ -43,7 +42,6 @@ const MisAsignaturas = () => {
     }
   };
 
-  // Fetch para obtener los estudiantes de la asignatura seleccionada
   const fetchStudents = async (asignaturaId) => {
     if (!asignaturaId) {
       setError('El ID de la asignatura es inválido.');
@@ -53,11 +51,9 @@ const MisAsignaturas = () => {
     setLoading(true);
     try {
       const response = await axios.get(`http://localhost:3000/subject/students/${asignaturaId}`);
+      
       if (response.data) {
-        setStudents(response.data.map(student => ({
-          ...student,
-          grades: Array.isArray(student.grades) ? student.grades : [null, null, null]  // Asegura que grades siempre sea un array
-        }))); // Aseguramos que `grades` sea un array
+        setStudents(response.data); 
         setError(null);
       } else {
         setError('No se encontraron estudiantes para esta asignatura.');
@@ -69,59 +65,83 @@ const MisAsignaturas = () => {
     }
   };
 
-  
-const handleInputChange = (e, studentId, gradeIndex) => {
-  const value = e.target.value;
-  if (value === "") {
-    updateStudentGrade(studentId, gradeIndex, null);
-    return;
-  }
-
-  const newGrade = parseFloat(value);
-
-
-  if (!isNaN(newGrade)) {
-  
-    updateStudentGrade(studentId, gradeIndex, newGrade);
-  } else {
-   
-    console.log("Valor no válido.");
-  }
-};
-
-const updateStudentGrade = (studentId, gradeIndex, grade) => {
-
-  const updatedStudents = students.map((student) => {
-    if (student.id_student === studentId) {
-      const updatedGrades = [...student.grades];
-      updatedGrades[gradeIndex] = grade; // Actualiza la nota en el índice correspondiente
-      return { ...student, grades: updatedGrades };
+  const fetchStudentsGrades = async (studentId) => {
+    if (!studentId || !selectedAsignatura) {
+      setError('Datos inválidos para obtener las calificaciones.');
+      return;
     }
-    return student;
-  });
 
-  setStudents(updatedStudents); // Actualiza el estado con los nuevos valores de notas
-};
+    setLoading(true);
+    try {
+      // Obtener las calificaciones del estudiante en la asignatura seleccionada
+      const response = await axios.get(`http://localhost:3000/student/${studentId}/grades/${selectedAsignatura.id}`);
+      if (response.data && Array.isArray(response.data)) {
+        const grades = response.data.map(grade => ({
+          id_grade: grade.id_grade,
+          grade: grade.grade,
+        }));
 
+        // Asegurar que siempre haya 3 notas
+        while (grades.length < 3) {
+          grades.push({ id_grade: null, grade: null });
+        }
 
-  // Manejo de la selección de asignatura
+        setSelectedAlumno(prevAlumno => ({ ...prevAlumno, grades }));
+        setError(null);
+      } else {
+        // Si no hay calificaciones, inicializar con notas vacías
+        const grades = [
+          { id_grade: null, grade: null },
+          { id_grade: null, grade: null },
+          { id_grade: null, grade: null },
+        ];
+        setSelectedAlumno(prevAlumno => ({ ...prevAlumno, grades }));
+        setError(null);
+      }
+    } catch (error) {
+      console.error('Error al obtener las calificaciones:', error);
+      setError(`Error al obtener las calificaciones del estudiante. Error: ${error.message}`);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleInputChange = (e, gradeIndex) => {
+    const value = e.target.value;
+    const newGrade = value === "" ? null : parseFloat(value);
+
+    setSelectedAlumno(prevAlumno => {
+      const updatedGrades = [...prevAlumno.grades];
+      if (!updatedGrades[gradeIndex]) {
+        updatedGrades[gradeIndex] = { id_grade: null, grade: newGrade };
+      } else {
+        updatedGrades[gradeIndex] = { ...updatedGrades[gradeIndex], grade: newGrade };
+      }
+      return { ...prevAlumno, grades: updatedGrades };
+    });
+  };
+
   const seleccionarAsignatura = (asignatura) => {
-    setSelectedAsignatura(asignatura); // Almacena la asignatura seleccionada
-    fetchStudents(asignatura.id); // Fetch de estudiantes
+    setSelectedAsignatura(asignatura);
+    setSelectedAlumno(null);
+    setStudents([]);
+    fetchStudents(asignatura.id);
+  };
+
+  const seleccionarAlumno = (student) => {
+    setSelectedAlumno(student);
+    fetchStudentsGrades(student.id_student);
   };
 
   const crearNuevaNota = async (studentId, newGrade) => {
     try {
-      setLoading(true);
-  
       const asignaturaId = parseInt(selectedAsignatura?.id, 10);
       const nivel = selectedAsignatura?.level;
       const year = new Date().getFullYear();
       const studentIdInt = parseInt(studentId, 10);
-  
+
       if (isNaN(newGrade)) return;
-  
-      // Realiza la solicitud para crear una nueva calificación
+
       const response = await axios.post('http://localhost:3000/grade', {
         grade: newGrade,
         level: nivel,
@@ -129,42 +149,41 @@ const updateStudentGrade = (studentId, gradeIndex, grade) => {
         id_student: studentIdInt,
         id_subject: asignaturaId
       });
-  
+
       if (response.data) {
-        alert('Nueva nota creada exitosamente!');
-      } else if (response.status == 500) {
+        return {
+          id_grade: response.data.id_grade,
+          grade: response.data.grade,
+        };
+      } else if (response.status === 500) {
         setError('Hubo un error al crear la nota.');
       }
     } catch (error) {
       console.error('Error al crear la nota:', error.response || error.message);
       setError(`Error al crear la nota: ${error.message}`);
-    } finally {
-      setLoading(false);
     }
   };
-  
-  
 
   const actualizarNota = async (gradeId, newGrade) => {
     if (isNaN(newGrade)) {
       setError('La calificación no es válida.');
       return;
     }
-  
+
     try {
-      setLoading(true);
-  
-      // Realiza la solicitud para actualizar la calificación
       const response = await axios.patch(`http://localhost:3000/grade/${gradeId}`, { grade: newGrade });
-  
+
       if (response.data) {
-        alert('Nota actualizada exitosamente!');
-      } else if (response.status == 500){
+        return {
+          id_grade: response.data.id_grade,
+          grade: response.data.grade,
+        };
+      } else if (response.status === 500){
         setError('Hubo un error al actualizar la nota.');
       }
     } catch (error) {
       console.error('Error al actualizar la nota:', error.response || error.message);
-  
+
       if (error.response && error.response.status === 404) {
         setError(`La calificación con ID ${gradeId} no existe. No se puede actualizar.`);
       } else if (error.response && error.response.status === 500) {
@@ -172,105 +191,114 @@ const updateStudentGrade = (studentId, gradeIndex, grade) => {
       } else {
         setError(`Error desconocido: ${error.response ? error.response.data : error.message}`);
       }
-    } finally {
-      setLoading(false);
     }
   };
-  
-  
-  
 
-  const handleSubmitNotas = async (e, studentId, grades) => {
-    e.preventDefault(); // Prevenir el comportamiento por defecto del formulario
-  
-    // Verificar si las calificaciones son válidas
-    console.log(grades)
-    if(grades == undefined){
-      return
-    }
-    console.log("llega 1")
-    const validGrades = grades.map(grade => !isNaN(grade) && grade >= 1.0 && grade <= 7.0); 
-    console.log("llega 2")
-    if (!validGrades.includes(true)) {
-      console.log("llega 3")
-      setError("Las calificaciones deben ser válidas (entre 1.0 y 7.0).");
+  const handleSubmitNotas = async (e) => {
+    e.preventDefault();
+
+    setLoading(true);
+
+    const studentId = selectedAlumno.id_student;
+    const grades = selectedAlumno.grades;
+
+    if (!grades || grades.length === 0) {
+      setError('No hay calificaciones para guardar.');
+      setLoading(false);
       return;
     }
-    console.log("llega 3,5")
+
     try {
-      console.log("llega 4")
-      // Para cada nota (en este caso asumimos 3 notas)
+      const updatedGrades = [...grades];
       for (let i = 0; i < grades.length; i++) {
-        console.log("llega 5")
-        const grade = grades[i];
-  
-        // Buscar si la calificación ya existe para ese estudiante
-        const student = students.find(student => student.id_student === studentId);
-        console.log("llega 6")
-        const existingGrade = student ? student.grades[i] : null;
-  
-        if (existingGrade && existingGrade.id_grade) {
-          console.log("llega 7")
-          // Si la calificación ya existe, la actualizamos
-          await actualizarNota(existingGrade.id_grade, grade);
+        const gradeObj = grades[i];
+        const gradeValue = gradeObj?.grade;
+        const gradeId = gradeObj?.id_grade;
+
+        if (gradeValue == null) continue;
+
+        if (gradeId) {
+          const updatedGrade = await actualizarNota(gradeId, gradeValue);
+          updatedGrades[i] = updatedGrade;
         } else {
-          console.log("llega 8")
-          // Si la calificación no existe, la creamos
-          await crearNuevaNota(studentId, grade);
+          const newGrade = await crearNuevaNota(studentId, gradeValue);
+          updatedGrades[i] = newGrade;
         }
       }
-  
-      // Actualizar el estado de los estudiantes localmente después de las operaciones
-      setStudents(prevStudents => {
-        console.log("llega 9")
-        return prevStudents.map(student => {
-          console.log("llega 10")
+
+      setSelectedAlumno(prevAlumno => ({ ...prevAlumno, grades: updatedGrades }));
+      setStudents(prevStudents =>
+        prevStudents.map(student => {
           if (student.id_student === studentId) {
-            console.log("llega 11")
-            const updatedGrades = [...student.grades];
-            updatedGrades[0] = { grade: grades[0] }; // Aquí deberías asegurarte de tener el ID correcto si ya existe
-            updatedGrades[1] = { grade: grades[1] };
-            updatedGrades[2] = { grade: grades[2] };
             return { ...student, grades: updatedGrades };
           }
-          console.log("llega 12")
           return student;
-       
-        });
-      });
-  
-      // Alerta de éxito
+        })
+      );
+
       alert('Notas guardadas exitosamente!');
-  
     } catch (error) {
       console.error('Error al guardar la nota:', error.message);
       setError(`Error al guardar la nota: ${error.message}`);
     } finally {
-      setLoading(false); // Desactivar el estado de "cargando"
+      setLoading(false);
     }
   };
-  
-  
-  
-  
-  
-  // Calcular el promedio de las notas
+
   const calcularPromedio = (grades) => {
-    const total = grades.reduce((acc, grade) => acc + (grade || 0), 0);
-    return (total / grades.length).toFixed(2);
+    const validGrades = grades.filter(gradeObj => gradeObj?.grade != null);
+    if (validGrades.length === 0) return '-';
+    const total = validGrades.reduce((acc, gradeObj) => acc + gradeObj.grade, 0);
+    return (total / validGrades.length).toFixed(2);
   };
 
-  // Mostrar el formulario para editar las notas
-  const mostrarFormularioNotas = () => {
+  const mostrarListaEstudiantes = () => {
     if (selectedAsignatura) {
       return (
+        <div className="estudiantes-container">
+          <h2>Estudiantes de {selectedAsignatura.name} ({selectedAsignatura.level})</h2>
+          <table className="estudiantes-table">
+            <thead>
+              <tr>
+                <th>Nombre</th>
+                <th>ID</th>
+              </tr>
+            </thead>
+            <tbody>
+              {students.length > 0 ? (
+                students.map((student) => (
+                  <tr
+                    key={student.id_student}
+                    onClick={() => seleccionarAlumno(student)}
+                    style={{ cursor: 'pointer' }}
+                  >
+                    <td>{student.name}</td>
+                    <td>{student.id_student}</td>
+                  </tr>
+                ))
+              ) : (
+                <tr>
+                  <td colSpan="2">No hay estudiantes disponibles para esta asignatura.</td>
+                </tr>
+              )}
+            </tbody>
+          </table>
+        </div>
+      );
+    }
+    return null;
+  };
+
+  const mostrarFormularioNotas = () => {
+    if (selectedAlumno) {
+      return (
         <div className="notas-container">
-          <h2>Notas de {selectedAsignatura.name} ({selectedAsignatura.level})</h2>
-          <form>
+          <h2>Notas de {selectedAlumno.name}</h2>
+          
+          {selectedAlumno.grades && selectedAlumno.grades.length > 0 ? (
             <table className="notas-table">
               <thead>
                 <tr>
-                  <th>Alumno</th>
                   <th>Nota 1</th>
                   <th>Nota 2</th>
                   <th>Nota 3</th>
@@ -279,57 +307,40 @@ const updateStudentGrade = (studentId, gradeIndex, grade) => {
                 </tr>
               </thead>
               <tbody>
-  {students.length > 0 ? (
-    students.map((student) => (
-      <tr key={student.id_student}>
-        <td>{student.name}</td>
-        <td>
-          <input
-            type="number"
-            step="0.1"
-            value={student.grades[0] || ''}
-            onChange={(e) => handleInputChange(e, student.id_student, 0)}
-          />
-        </td>
-        <td>
-          <input
-            type="number"
-            step="0.1"
-            value={student.grades[1] || ''}
-            onChange={(e) => handleInputChange(e, student.id_student, 1)}
-            min="1.0"
-            max="7.0"
-          />
-        </td>
-        <td>
-          <input
-            type="number"
-            step="0.1"
-            value={student.grades[2] || ''}
-            onChange={(e) => handleInputChange(e, student.id_student, 2)}
-            min="1.0"
-            max="7.0"
-          />
-        </td>
-        <td>{calcularPromedio(student.grades)}</td>
-        <td>
-          <button
-            onClick={(e) => handleSubmitNotas(e, student.id_student, student.grades)}
-          >
-            Guardar
-          </button>
-        </td>
-      </tr>
-    ))
-  ) : (
-    <tr>
-      <td colSpan="6">No hay estudiantes en este nivel para esta asignatura.</td>
-    </tr>
-  )}
-</tbody>
-
+                <tr>
+                  <td>
+                    <input
+                      type="number"
+                      value={selectedAlumno.grades[0]?.grade || ''}
+                      onChange={(e) => handleInputChange(e, 0)}
+                    />
+                  </td>
+                  <td>
+                    <input
+                      type="number"
+                      value={selectedAlumno.grades[1]?.grade || ''}
+                      onChange={(e) => handleInputChange(e, 1)}
+                    />
+                  </td>
+                  <td>
+                    <input
+                      type="number"
+                      value={selectedAlumno.grades[2]?.grade || ''}
+                      onChange={(e) => handleInputChange(e, 2)}
+                    />
+                  </td>
+                  <td>{calcularPromedio(selectedAlumno.grades)}</td>
+                  <td>
+                    <button onClick={handleSubmitNotas}>
+                      Guardar
+                    </button>
+                  </td>
+                </tr>
+              </tbody>
             </table>
-          </form>
+          ) : (
+            <div>Este estudiante no tiene notas asignadas.</div>
+          )}
         </div>
       );
     }
@@ -375,10 +386,12 @@ const updateStudentGrade = (studentId, gradeIndex, grade) => {
         </tbody>
       </table>
 
+      {mostrarListaEstudiantes()}
+
       {mostrarFormularioNotas()}
 
       {loading && <div>Cargando...</div>}
-      {error && <div>{error}</div>}
+      {error && <div className="error-message">{error}</div>}
     </div>
   );
 };

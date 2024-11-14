@@ -3,10 +3,8 @@
 /* Contenedor principal */
 .mis-asignaturas {
     padding: 20px;
-    max-width: 1200px;
     margin: 0 auto;
     background-color: #f8f9fa; /* Color de fondo suave */
-    box-sizing: border-box;
 }
 
 /* Título */

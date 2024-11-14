@@ -1,18 +1,23 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import './MisHijos.css';
+import { PDFDownloadLink } from '@react-pdf/renderer';
+import PDF from '../../PDF';
 
 const MisHijos = () => {
-  const [alumnos, setAlumnos] = useState([]); // Alumnos
-  const [error, setError] = useState(null);   // Para manejar errores
-  const [alumnoSeleccionado, setAlumnoSeleccionado] = useState(null); // Alumno seleccionado
-  const [loading, setLoading] = useState(false); // Para manejar el estado de carga
-  const [searchQuery, setSearchQuery] = useState(''); // Para el filtro de búsqueda
+  const [alumnos, setAlumnos] = useState([]);
+  const [error, setError] = useState(null);
+  const [alumnoSeleccionado, setAlumnoSeleccionado] = useState(null);
+  const [loading, setLoading] = useState(false);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [notas, setNotas] = useState({});
+  const [asistencia, setAsistencia] = useState({});
+  const [cursos, setCursos] = useState([]);
+  const [cursoSeleccionado, setCursoSeleccionado] = useState(null);
   const [accessToken, setAccessToken] = useState(localStorage.getItem('accessToken'));
 
   useEffect(() => {
     if (accessToken) {
-      // Verificar si el accessToken es válido antes de hacer la solicitud
       if (isValidJWT(accessToken)) {
         fetchStudents(accessToken);
       } else {
@@ -23,29 +28,20 @@ const MisHijos = () => {
     }
   }, [accessToken]);
 
-  // Función para verificar si el accessToken tiene el formato válido de un JWT
   const isValidJWT = (token) => {
     const parts = token.split('.');
-    return parts.length === 3; // Un JWT válido tiene 3 partes: header, payload, signature
+    return parts.length === 3;
   };
 
-  // Función para obtener los estudiantes
   const fetchStudents = async (accessToken) => {
     if (!accessToken) {
       setError('Token is missing');
       return;
     }
 
-    setLoading(true); // Iniciar la carga de datos
-
+    setLoading(true);
     try {
-      console.log('Token enviado como parámetro:', accessToken);
-
-      // Agregar el token como parámetro en la URL
       const response = await axios.get(`http://localhost:3000/parent/get-students/${accessToken}`);
-
-      console.log("Respuesta de los estudiantes:", response);
-
       if (response.data && Array.isArray(response.data)) {
         setAlumnos(response.data);
         setError(null);
@@ -53,63 +49,110 @@ const MisHijos = () => {
         setError('No se encontraron alumnos.');
       }
     } catch (error) {
-      console.error('Error al obtener los estudiantes:', error);
       setError(`No se pudieron obtener los estudiantes. Error: ${error.message}`);
     } finally {
-      setLoading(false); // Finalizar la carga de datos
+      setLoading(false);
     }
   };
 
-  // Función para manejar la visualización de asistencia
-  const handleVerAsistencia = () => {
-    if (alumnoSeleccionado) {
-      alert(`Ver asistencia de ${alumnoSeleccionado.name} ${alumnoSeleccionado.lastname}`);
+  const fetchCursos = async (id) => {
+    setLoading(true);
+    try {
+      const response = await axios.get(`http://localhost:3000/subject/subjects/${id}`);
+      if (response.data) {
+        const cursosOrdenados = response.data.sort((a, b) => a.name.localeCompare(b.name));
+        setCursos(cursosOrdenados);
+        setError(null);
+        return cursosOrdenados;
+      } else {
+        setError('No se encontraron cursos para este alumno.');
+        return [];
+      }
+    } catch (error) {
+      setError(`Error al obtener los cursos. Error: ${error.message}`);
+      return [];
+    } finally {
+      setLoading(false);
     }
   };
 
-  // Función para manejar la visualización de calificaciones
-  const handleVerCalificaciones = () => {
-    if (alumnoSeleccionado) {
-      alert(`Ver calificaciones de ${alumnoSeleccionado.name} ${alumnoSeleccionado.lastname}`);
+  const fetchAllNotasAndAsistencia = async (alumnoId, cursos) => {
+    setLoading(true);
+    try {
+      const notasMap = {};
+      const asistenciaMap = {};
+
+      for (const curso of cursos) {
+        // Obtener notas
+        try {
+          const responseNotas = await axios.get(`http://localhost:3000/student/${alumnoId}/grades/${curso.id_subject}`);
+          notasMap[curso.id_subject] = responseNotas.data;
+        } catch (error) {
+          notasMap[curso.id_subject] = [];
+        }
+
+        // Obtener asistencia
+        try {
+          const responseAsistencia = await axios.get(`http://localhost:3000/attendance/subject/${curso.id_subject}/student/${alumnoId}/percentage`);
+          asistenciaMap[curso.id_subject] = responseAsistencia.data;
+        } catch (error) {
+          asistenciaMap[curso.id_subject] = null;
+        }
+      }
+
+      setNotas(notasMap);
+      setAsistencia(asistenciaMap);
+    } catch (error) {
+      setError(`Error al obtener las notas y asistencia. Error: ${error.message}`);
+    } finally {
+      setLoading(false);
     }
   };
 
-  // Función para seleccionar un alumno
-  const seleccionarAlumno = (alumno) => {
+  const seleccionarAlumno = async (alumno) => {
     setAlumnoSeleccionado(alumno);
+    setCursoSeleccionado(null);
+    setNotas({});
+    setAsistencia({});
+    setCursos([]);
+    const cursosObtenidos = await fetchCursos(alumno.id);
+    await fetchAllNotasAndAsistencia(alumno.id, cursosObtenidos);
   };
 
-  // Filtrar los alumnos según el query de búsqueda
+  const seleccionarCurso = (curso) => {
+    if (cursoSeleccionado && cursoSeleccionado.id_subject === curso.id_subject) {
+      setCursoSeleccionado(null);
+    } else {
+      setCursoSeleccionado(curso);
+    }
+  };
+
   const filteredAlumnos = alumnos.filter((alumno) => {
     const query = searchQuery.toLowerCase();
-    return (
-      alumno.name.toLowerCase().includes(query) ||
-      alumno.lastname.toLowerCase().includes(query)
-    );
+    return alumno.name.toLowerCase().includes(query) || alumno.lastname.toLowerCase().includes(query);
   });
 
   return (
     <div className="mis-hijos">
       <h1>Datos Alumno</h1>
-      
+
       <div className="top-bar">
         <div className="search-container">
-          <input 
-            type="text" 
-            placeholder="Buscar alumno..." 
-            value={searchQuery} 
-            onChange={(e) => setSearchQuery(e.target.value)} 
+          <input
+            type="text"
+            placeholder="Buscar alumno..."
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
           />
         </div>
       </div>
 
-      {/* Mostrar mensaje de carga mientras se obtienen los datos */}
-      {loading && <p>Cargando estudiantes...</p>}
+      {loading && <p>Cargando...</p>}
 
-      {/* Mostramos los alumnos en una tabla */}
       <table className="alumno-table">
         <thead>
           <tr>
+            <th>ID</th>
             <th>Nombre</th>
             <th>Nivel</th>
           </tr>
@@ -119,11 +162,11 @@ const MisHijos = () => {
             filteredAlumnos.map((alumno) => (
               <tr
                 key={alumno.id}
-                onClick={() => seleccionarAlumno(alumno)}  // Seleccionamos el alumno al hacer clic
+                onClick={() => seleccionarAlumno(alumno)}
                 style={{ cursor: 'pointer' }}
               >
+                <td>{alumno.id}</td>
                 <td>{alumno.name}</td>
-                <td>{alumno.lastname}</td>
                 <td>{alumno.level}</td>
               </tr>
             ))
@@ -135,15 +178,98 @@ const MisHijos = () => {
         </tbody>
       </table>
 
-      {/* Mostramos los errores si ocurren */}
       {error && <p className="error-message">{error}</p>}
 
-      {/* Mostrar información del alumno seleccionado */}
       {alumnoSeleccionado && (
         <div>
           <h2>Perfil del Alumno: {alumnoSeleccionado.name} {alumnoSeleccionado.lastname}</h2>
-          <button onClick={handleVerAsistencia}>Ver Asistencia</button>
-          <button onClick={handleVerCalificaciones}>Ver Calificaciones</button>
+
+          {/* Mostrar los cursos del alumno */}
+          <h3>Cursos de {alumnoSeleccionado.name}:</h3>
+          <table>
+            <thead>
+              <tr>
+                <th>ID Curso</th>
+                <th>Nombre Curso</th>
+              </tr>
+            </thead>
+            <tbody>
+              {cursos.length > 0 ? (
+                cursos.map((curso) => (
+                  <tr
+                    key={curso.id_subject}
+                    onClick={() => seleccionarCurso(curso)}
+                    style={{ cursor: 'pointer' }}
+                  >
+                    <td>{curso.id_subject}</td>
+                    <td>{curso.name}</td>
+                  </tr>
+                ))
+              ) : (
+                <tr>
+                  <td colSpan="2">No hay cursos disponibles para este alumno.</td>
+                </tr>
+              )}
+            </tbody>
+          </table>
+
+          {/* Mostrar el porcentaje de asistencia sobre las notas */}
+          {cursoSeleccionado && (
+            <div>
+              <h4>Porcentaje de Asistencia:</h4>
+              <p>
+                {asistencia && asistencia[cursoSeleccionado.id_subject] !== undefined && asistencia[cursoSeleccionado.id_subject] !== null ? (
+                  typeof asistencia[cursoSeleccionado.id_subject] === 'number'
+                    ? `${asistencia[cursoSeleccionado.id_subject].toFixed(2)}%`
+                    : 'Sin datos'
+                ) : (
+                  'Sin datos de asistencia'
+                )}
+              </p>
+            </div>
+          )}
+
+          {/* Mostrar las notas del curso seleccionado */}
+          {cursoSeleccionado && notas[cursoSeleccionado.id_subject] && (
+            <div>
+              <h3>Notas del curso: {cursoSeleccionado.name}</h3>
+              <table>
+                <thead>
+                  <tr>
+                    <th>Nota 1</th>
+                    <th>Nota 2</th>
+                    <th>Nota 3</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td>{notas[cursoSeleccionado.id_subject][0]?.grade || '-'}</td>
+                    <td>{notas[cursoSeleccionado.id_subject][1]?.grade || '-'}</td>
+                    <td>{notas[cursoSeleccionado.id_subject][2]?.grade || '-'}</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          )}
+        </div>
+      )}
+
+      {alumnoSeleccionado && notas && asistencia && cursos && (
+        <div style={{ marginTop: '20px' }}>
+          <PDFDownloadLink
+            document={
+              <PDF
+                alumno={alumnoSeleccionado}
+                nivel={alumnoSeleccionado.level}
+                notas={notas}
+                asistencia={asistencia}
+                cursos={cursos}
+              />
+            }
+            fileName={`Informe-${alumnoSeleccionado.name}.pdf`}
+          >
+            {({ loading }) => (loading ? <button>Cargando documento...</button> : <button>Descargar PDF</button>)}
+          </PDFDownloadLink>
         </div>
       )}
     </div>
