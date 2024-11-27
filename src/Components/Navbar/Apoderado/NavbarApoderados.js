@@ -34,8 +34,8 @@ class NavbarApoderado extends Component {
                 </a>
             </li>
             <li>
-              <a  className={currentScreen === 'solicitud' ? 'active' : ''} href="#" onClick={() => this.props.onNavigate('solicitud')}>
-                Solicitud
+              <a  className={currentScreen === 'calendario' ? 'active' : ''} href="#" onClick={() => this.props.onNavigate('calendario')}>
+                Calendario
               </a>
             </li>
             <li>

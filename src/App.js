@@ -13,6 +13,8 @@ import './App.css';
 import Asignaturas from "./Components/Admin/Asignaturas/Asignaturas";
 import MisAsignaturas from "./Components/PaginaProfesor/Asignatura/MisAsignaturas";
 import Asistencia from "./Components/PaginaProfesor/Asistencia/Asistencia";
+import Calendario from "./Components/Calendario/Calendario";
+
 function App() {
     const [screen, setScreen] = useState('login');
     const [email, setEmail] = useState('');
@@ -123,13 +125,17 @@ function App() {
                 {screen === 'misAsignaturas' && <MisAsignaturas />} 
                 {screen === 'asistencia' && <Asistencia />} 
                 
+                {screen === 'calendario' && <Calendario />} 
 
                 {/* Pantalla de Inicio */}
                 {screen === 'inicio' && (
                     <div className="inicio-container">
                         <ImageBanner />
                         <div className="inicio-buttons">
-                            <button className="agenda-button" onClick={() => handleNavigate('agenda')}>Agenda Escolar</button>
+                             {userType === 'admin' || 'professor' && (
+                                  <button className="agenda-button" onClick={() => handleNavigate('calendario')}>Agenda Escolar</button>
+                            )}
+                         
                             {userType === 'parent' && (
                                 <button className="Mi-Alumno" onClick={() => handleNavigate('misHijos')}>Mi Alumno</button>
                             )}
@@ -137,16 +143,6 @@ function App() {
                     </div>
                 )}
 
-                {/* Banner de imágenes y botones para el admin */}
-                {screen === 'admin' && (
-                    <>
-                        <ImageBanner />
-                        <div className="button-container">
-                            <button className="agenda-button" onClick={() => handleNavigate('agenda')}>Agenda Escolar</button>
-                        </div>
-                    </>
-                )}
-                
             </div>
         </div>
     );
