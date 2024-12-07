@@ -7,6 +7,7 @@ import axios from 'axios';
 import "../Calendario/Calendario.css";
 import { useState, useEffect } from 'react';
 import { act } from "react";
+import { current } from "@reduxjs/toolkit";
 
 const Calendario = () => {
 
@@ -24,7 +25,7 @@ const Calendario = () => {
      useEffect(() => {
         const fetchCalendario = async () => {
             try {
-                const response = await axios.get('http://localhost:3000/parent');
+                const response = await axios.get('http://localhost:3000/calendar');
                 setCalendario(response.data);
             } catch (error) {
                 console.error('Error al cargar calendario:', error);
@@ -34,45 +35,58 @@ const Calendario = () => {
     }, []);
 
 
-     // Crear nueva actividad en el calendario 
-     const handleRegister = async () => {
-        const newActividad = { title, start, end, description };
-
-        // Validaciones  "fecha inicio y fecha fin con la hora"
-        
-
-        try {
-            const response = await fetch('http://localhost:3000/parent', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify(newActividad),
-            });
-            const data = await response.json();
-            console.log('Actividad registrada:', data);
-            setCalendario((prev) => [...prev, data]); // Actualiza la lista con el nuevo apoderado
-            handleCloseModal(); // Cierra el modal después de guardar
-        } catch (error) {
-            console.log('Error de servidor', error.response ? error.response.data : error);
-            if (error.response && error.response.status === 409) {
-                console.log('Esta actividad ya existe');
-            }
-        }
-    };
-
+    const handleRegister = async () => {
+      // Validación de datos
+      if (!title || !start || !end || !description) {
+          console.error('Todos los campos son obligatorios');
+          return;
+      }
+  
+      // Crear instancias de Date directamente en el frontend
+      const newActividad = {
+          title,
+          start: new Date(start), // Convertir a instancia de Date
+          end: new Date(end),     // Convertir a instancia de Date
+          description,
+      };
+      console.log(newActividad)
+      try {
+          const response = await fetch('http://localhost:3000/calendar', {
+              method: 'POST',
+              headers: {
+                  'Content-Type': 'application/json',
+              },
+              body: JSON.stringify(newActividad), // Serializar el objeto con instancias de Date
+          });
+  
+          if (!response.ok) {
+              const errorData = await response.json();
+              console.error('Error en la solicitud:', errorData);
+              if (response.status === 409) {
+                  console.log('Esta actividad ya existe');
+              }
+              return;
+          }
+  
+          const data = await response.json();
+          console.log('Actividad registrada:', data);
+          setCalendario((prev) => [...prev, data]); // Actualiza la lista
+          handleCloseModal(); // Cierra el modal
+      } catch (error) {
+          console.error('Error de servidor', error.message);
+      }
+  };
+  
     //funcion para actualizar una actividad desde el back
     const handleUpdate = async () => {
-        if (!currentActividad || !currentActividad.id_event) {
+        if (!currentActividad || !currentActividad.id) {
             console.error("ID de la actividad no proporcionado para la actualizacion");
             return;
         }
 
         const updatedActividad = { title, start, end, description };
-        // Validaciones  "fecha inicio y fecha fin con la hora"
-
         try {
-            const response = await fetch(`http://localhost:3000/parent/${currentActividad.id_event}`, {
+            const response = await fetch(`http://localhost:3000/calendar/${currentActividad.id}`, {
                 method: 'PATCH',
                 headers: {
                     'Content-Type': 'application/json',
@@ -85,9 +99,9 @@ const Calendario = () => {
             }
 
             const data = await response.json();
-            console.log('Apoderado actualizado:', data);
+            console.log('Evento actualizado:', data);
             setCalendario((prev) => 
-                prev.map(calendario => calendario.id_event === currentActividad.id_event ? { ...calendario, ...data } : calendario)
+                prev.map(calendario => calendario.id === currentActividad.id ? { ...calendario, ...data } : calendario)
             );
             handleCloseModal(); // Cierra el modal después de actualizar
         } catch (error) {
@@ -108,9 +122,9 @@ const Calendario = () => {
 
         try {
             // Realiza la solicitud DELETE
-            const response = await axios.delete(`http://localhost:3000/parent/${idToDelete}`);
+            const response = await axios.delete(`http://localhost:3000/calendar/${idToDelete}`);
             // Actualiza la lista de apoderados en el estado
-            setCalendario((prevActividades) => prevActividades.filter((item) => item.id_event !== idToDelete));
+            setCalendario((prevActividades) => prevActividades.filter((item) => item._id !== idToDelete));
             console.log("Actividad eliminada:", response.data);
         } catch (error) {
             console.error("Error eliminando actividad:", error.response ? error.response.data : error.message);
@@ -128,13 +142,15 @@ const Calendario = () => {
     
 
     const handleEdit = (calendario) => {
+      console.log(calendario)
         setCurrentActividad(calendario);
         setTitle(calendario.title); // Cargar el nombre actual
-        setStart(calendario.start); // Cargar el email actual
+        setStart(calendario.startStr); // Cargar el email actual
         setEnd(calendario.end);
         setDescription(calendario.description);
         setEditMode(true);
         setShowModal(true);
+     
        
     };
 
@@ -148,39 +164,25 @@ const Calendario = () => {
         setEnd('');
         setDescription('');
     };
-
-    // Lista de eventos (ejemplo)
-  const events = [
-    {
-      id: 1,
-      title: "Reunión de trabajo",
-      start: "2024-11-28T10:00:00",
-      end: "2024-11-28T12:00:00",
-      description: "Reunión con el equipo para revisar el proyecto.",
-    },
-    {
-      id: 2,
-      title: "Conferencia sobre React",
-      start: "2024-11-30T14:00:00",
-      end: "2024-11-30T16:00:00",
-      description: "Charla sobre las mejores prácticas en React.",
-    },
-    {
-      id: 3,
-      title: "Almuerzo con cliente",
-      start: "2024-12-01T13:00:00",
-      end: "2024-12-01T14:30:00",
-      description: "Reunión con cliente potencial para discutir nuevo proyecto.",
-    },
-    {
-      id: 4,
-      title: "Revisión de código",
-      start: "2024-12-05T09:00:00",
-      end: "2024-12-05T11:00:00",
-      description: "Revisión del código con el equipo de desarrollo.",
-    },
-  ];
     
+    const filteredEvents = calendario.filter(evento =>
+      evento.title.toLowerCase().includes(searchTerm.toLowerCase())
+  );
+
+  const processedEvents = filteredEvents.map(evento => ({
+    id: evento._id, // Asegúrate de que cada evento tiene un `id`
+    title: evento.title,
+    start: evento.start,
+    end: evento.end,
+    description: evento.description,
+    extendedProps: {
+        _id: evento._id,
+        description: evento.description,
+    },
+  })
+);
+
+
     return (
     <main>
         
@@ -195,7 +197,7 @@ const Calendario = () => {
             
         }}
         height={"90vh"}
-        events={events}  // Pasamos los eventos al calendario
+        events={processedEvents}  // Pasamos los eventos al calendario
         eventClick={(info) => handleEdit(info.event)} // Abrir el modal para editar
         
         />
@@ -216,6 +218,7 @@ const Calendario = () => {
               onSubmit={(e) => {
                 e.preventDefault();
                 if (editMode) {
+                  console.log("entr aa edit")
                   handleUpdate(); // Llama a la función de actualización
                 } else {
                   handleRegister(); // Llama a la función de registro

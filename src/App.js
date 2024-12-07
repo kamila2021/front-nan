@@ -14,6 +14,9 @@ import Asignaturas from "./Components/Admin/Asignaturas/Asignaturas";
 import MisAsignaturas from "./Components/PaginaProfesor/Asignatura/MisAsignaturas";
 import Asistencia from "./Components/PaginaProfesor/Asistencia/Asistencia";
 import Calendario from "./Components/Calendario/Calendario";
+import Mensualidad from "./Components/PaginaApoderado/Mensualidad/PlataformaPagos";
+
+
 
 function App() {
     const [screen, setScreen] = useState('login');
@@ -126,13 +129,15 @@ function App() {
                 {screen === 'asistencia' && <Asistencia />} 
                 
                 {screen === 'calendario' && <Calendario />} 
+        
+                {screen === 'mensualidad' && <Mensualidad />} 
 
                 {/* Pantalla de Inicio */}
                 {screen === 'inicio' && (
                     <div className="inicio-container">
                         <ImageBanner />
                         <div className="inicio-buttons">
-                             {userType === 'admin' || 'professor' && (
+                             {userType === 'admin'  && (
                                   <button className="agenda-button" onClick={() => handleNavigate('calendario')}>Agenda Escolar</button>
                             )}
                          

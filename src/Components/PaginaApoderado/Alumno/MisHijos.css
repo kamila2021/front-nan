@@ -3,10 +3,13 @@
 /* Contenedor principal */
 .mis-hijos {
     padding: 20px;
-    margin: 0 auto;
-    background-color: #f8f9fa; /* Color de fondo suave */
+    margin: 0; /* Quitar margen fijo */
+    background-color: #f8f9fa;
+    max-width: 1200px; /* Limita el ancho máximo */
+    width: 100%; /* Ocupa todo el ancho disponible */
+    margin: 20px auto; /* Centrado automático */
+    box-sizing: border-box;
 }
-
 /* Título */
 .mis-hijos h1 {
     text-align: center;
@@ -20,7 +23,7 @@
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin-bottom: 20px;
+    margin-bottom: 20px auto;
 }
 
 .search-container {

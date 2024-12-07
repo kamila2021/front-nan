@@ -24,18 +24,13 @@ class NavbarApoderado extends Component {
               </a>
             </li>
             <li>
-              <a className={currentScreen === 'chat' ? 'active' : ''} href="#" onClick={() => this.props.onNavigate('chat')}>
-                Chat
+              <a  className={currentScreen === 'calendario' ? 'active' : ''} href="#" onClick={() => this.props.onNavigate('calendario')}>
+                Calendario
               </a>
             </li>
             <li>
-              <a  className={currentScreen === 'pago' ? 'active' : ''} href="#" onClick={() => this.props.onNavigate('pago')}>
+              <a  className={currentScreen === 'mensualidad' ? 'active' : ''} href="#" onClick={() => this.props.onNavigate('mensualidad')}>
                 Mensualidad
-                </a>
-            </li>
-            <li>
-              <a  className={currentScreen === 'calendario' ? 'active' : ''} href="#" onClick={() => this.props.onNavigate('calendario')}>
-                Calendario
               </a>
             </li>
             <li>

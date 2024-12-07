@@ -1,94 +1,96 @@
 /* Contenedor principal del calendario */
 .contenedor-calendario {
-  width: 100%;
-  max-width: 1000px; /* Limita el ancho máximo */
-  margin: 0 auto; /* Centra el calendario */
-  border-collapse: collapse;
+    width: 100%;
+    max-width: 1000px; /* Limita el ancho máximo */
+    margin: 0 auto; /* Centra el calendario */
+    border-collapse: collapse;
 }
 
 /* Responsividad: cuando el ancho de pantalla es menor que 1000px */
 @media (max-width: 1000px) {
-  .contenedor-calendario {
-      width: 100%;
-      padding: 0 15px; /* Agrega un pequeño espaciado */
-  }
+    .contenedor-calendario {
+        width: 100%;
+        padding: 0 15px; /* Agrega un pequeño espaciado */
+    }
 }
 
 /* Estilos para el toolbar de la cabecera del calendario */
 .fc-header-toolbar {
-  padding: 20px;
-  text-align: center; /* Centra los botones */
+    padding: 20px;
+    text-align: center; /* Centra los botones */
 }
 
 /* Botón para añadir nueva actividad */
 .new-actividad {
-  background-color: #4CAF50;
-  color: white;
-  border: none;
-  padding: 15px;
-  font-size: 1.2rem;
-  border-radius: 4px;
-  cursor: pointer;
-  position: absolute;
- 
+    background-color: #4CAF50;
+    color: white;
+    border: none;
+    padding: 15px;
+    font-size: 1.2rem;
+    border-radius: 4px;
+    cursor: pointer;
+    position: absolute;
+    top: 20px;
+    right: 20px;
+    z-index: 100; /* Asegura que esté por encima del calendario */
 }
 
 /* Estilo para el título del calendario */
 .fc-toolbar-title {
-  color: black;
-  font-size: 2rem;
-  font-weight: bold;
+    color: black;
+    font-size: 2rem;
+    font-weight: bold;
 }
 
 /* Espaciado entre elementos en la toolbar */
 .fc-toolbar-chunk {
-  padding: 20px;
+    padding: 20px;
 }
 
 /* Estilo para los botones de la barra de herramientas */
 .fc .fc-button-group > .fc-button {
-  flex: 1 1 auto;
-  position: relative;
-  background-color: #333;
-  color: white;
+    flex: 1 1 auto;
+    position: relative;
+    background-color: #333;
+    color: white;
 }
 
 /* Estilo para ocultar el cuerpo de las celdas de los días en el calendario */
 .fc .fc-timegrid .fc-daygrid-body {
-  display: none;
+    display: none;
 }
 
 /* Hacer que los botones del calendario sean responsivos */
 .fc .fc-button {
-  font-size: 1rem; /* Cambiar el tamaño del texto */
-  padding: 10px; /* Ajustar el espaciado */
-  width: auto; /* Ajustar el tamaño de los botones */
+    font-size: 1rem; /* Cambiar el tamaño del texto */
+    padding: 10px; /* Ajustar el espaciado */
+    width: auto; /* Ajustar el tamaño de los botones */
 }
 
 /* Responsividad en pantallas pequeñas (menos de 600px) */
 @media (max-width: 600px) {
-  .fc-toolbar-title {
-      font-size: 1.5rem; /* Reducir el tamaño del título */
-  }
+    .fc-toolbar-title {
+        font-size: 1.5rem; /* Reducir el tamaño del título */
+    }
 
-  .fc-header-toolbar {
-      padding: 10px; /* Reducir el espaciado */
-  }
+    .fc-header-toolbar {
+        padding: 10px; /* Reducir el espaciado */
+    }
 
-  .new-actividad {
-      padding: 12px; /* Ajustar tamaño del botón */
-      font-size: 1rem; /* Reducir el tamaño de la fuente */
-      top: 10px; /* Ajustar posición en pantallas pequeñas */
-      right: 10px;
-  }
+    .new-actividad {
+        padding: 12px; /* Ajustar tamaño del botón */
+        font-size: 1rem; /* Reducir el tamaño de la fuente */
+        top: 10px; /* Ajustar posición en pantallas pequeñas */
+        right: 10px;
+    }
 
-  /* Ajustar tamaño de los eventos */
-  .fc-event {
-      font-size: 0.9rem;
-      padding: 5px;
-  }
+    /* Ajustar tamaño de los eventos */
+    .fc-event {
+        font-size: 0.9rem;
+        padding: 5px;
+    }
 
-  .fc-daygrid-event {
-      font-size: 0.8rem;
-  }
+    .fc-daygrid-event {
+        font-size: 0.8rem;
+    }
 }
